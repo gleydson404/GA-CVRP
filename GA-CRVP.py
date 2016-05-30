@@ -23,10 +23,12 @@
 import numpy as np
 
 
-# Acao: Gera um indiviuo
+# Acao: Gera um cromossomo
 # parametros: qtd_vehicles, qtd_costumers
 def generate_cromossome(vehicle, qtd_costumers):
-    crm = np.random.randint(qtd_costumers, size=qtd_costumers)
+    crm = np.random.randint(1, qtd_costumers + 1, size=qtd_costumers)
+    crm = np.append(crm, [0])
+    crm = np.append([0], crm)
     crm = np.append(crm, [vehicle])
     # crm = np.append(crm, [fitness]) #todo calc fitness
     return crm
