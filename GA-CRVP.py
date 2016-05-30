@@ -1,9 +1,9 @@
 # Representação do invididuo deve serguir a forma:
-# [[costumer#1, costumer#2, costumer#n, fitness, vehicle], 
-# [costumer#1, costumer#2, costumer#n, fitness, vehicle], 
-# [costumer#1, costumer#2, costumer#n, fitness, vehicle]] 
+# [[costumer#1, costumer#2, costumer#n, fitness, vehicle],
+# [costumer#1, costumer#2, costumer#n, fitness, vehicle],
+# [costumer#1, costumer#2, costumer#n, fitness, vehicle]]
 #
-# onde, 
+# onde,
 #
 # * A quantidade de linhas dessa matriz, sera a quantidade
 # de veiculos
@@ -17,13 +17,28 @@
 
 # Os parametros para a execucao geral do algoritmo
 # devem vir de um arquivo parameters.json que deve
-# estar na mesma pasta que este script 
+# estar na mesma pasta que este script
 
 
 import numpy as np
 
-# Acao: Gera um indiviuo
-# parametros: 
-def generate_individual(qtd_vehicles, qtd_costumers):
-    pass    
 
+# Acao: Gera um indiviuo
+# parametros: qtd_vehicles, qtd_costumers
+def generate_cromossome(vehicle, qtd_costumers):
+    crm = np.random.randint(qtd_costumers, size=qtd_costumers)
+    crm = np.append(crm, [vehicle])
+    # crm = np.append(crm, [fitness]) #todo calc fitness
+    return crm
+
+
+# Acao: Gera um indiviuo
+# parametros: qtd_vehicles, qtd_costumers
+def generate_individual(qtd_vehicles, qtd_costumers):
+    individual = []
+    for vehicle in range(qtd_vehicles):
+        individual.append(generate_cromossome(vehicle, qtd_costumers))
+    return np.array(individual)
+
+
+print(generate_individual(5, 10))
