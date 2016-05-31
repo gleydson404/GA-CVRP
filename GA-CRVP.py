@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-# Representação do invididuo deve serguir a forma:
+# Representacao do invididuo deve serguir a forma:
 
 # [custumer1, costumer2, costumer3, #, costumer4, costumer5, #]
 # para 2 carros
 # [costumer1, costumer2, costumer3, costumer4, #, # ]
 # também para 2 carros, mas nesse caso, apenas 1 carro tem rota
 
-# Estão sendo utilizados # como separadores por que consideramos que
+# Estao sendo utilizados # como separadores porque consideramos que
 # todos os carros tem capacidades iguais
 #
 # Os parametros para a execucao geral do algoritmo
@@ -16,7 +16,14 @@
 
 import numpy as np
 from Distances import euclidian as ec
+import json
 
+#Lendo arquivo de configuracao .json
+with open("parameters.json") as json_file:
+    parameters = json.load(json_file)
+    capacidade_veiculo = parameters['capacidade_veiculo']
+    print(capacidade_veiculo)
+#    json1_data = json.loads(json1_str)[0]
 # parametro colocado aqui enquanto não é possivel ler o
 # arquivo de teste
 qtd_costumers = 10
