@@ -1,46 +1,65 @@
+# -*- coding: utf-8 -*-
 # Representação do invididuo deve serguir a forma:
-# [[costumer#1, costumer#2, costumer#n, fitness, vehicle],
-# [costumer#1, costumer#2, costumer#n, fitness, vehicle],
-# [costumer#1, costumer#2, costumer#n, fitness, vehicle]]
-#
-# onde,
-#
-# * A quantidade de linhas dessa matriz, sera a quantidade
-# de veiculos
-# * Os campos veiculos e fitness serao fixos
-# * Somente os clientes sofrerao os operadores
-# * O fitness de cada cromossomo(Consideraremos cromossomo
-# como sendo cada linha da matriz) sera atualizado a cada
-# alteracao que o cromossomo sofra
-# * O fitness do invididuo sera a soma do fitness de cada
-# cromossomo
 
+# [custumer1, costumer2, costumer3, #, costumer4, costumer5, #]
+# para 2 carros
+# [costumer1, costumer2, costumer3, costumer4, #, # ]
+# também para 2 carros, mas nesse caso, apenas 1 carro tem rota
+
+# Estão sendo utilizados # como separadores por que consideramos que
+# todos os carros tem capacidades iguais
+#
 # Os parametros para a execucao geral do algoritmo
 # devem vir de um arquivo parameters.json que deve
 # estar na mesma pasta que este script
 
 
 import numpy as np
+from Distances import euclidian as ec
 
+# parametro colocado aqui enquanto não é possivel ler o
+# arquivo de teste
+qtd_costumers = 4
 
-# Acao: Gera um cromossomo
-# parametros: qtd_vehicles, qtd_costumers
-def generate_cromossome(vehicle, qtd_costumers):
-    crm = np.random.randint(1, qtd_costumers + 1, size=qtd_costumers)
-    crm = np.append(crm, [0])
-    crm = np.append([0], crm)
-    crm = np.append(crm, [vehicle])
-    # crm = np.append(crm, [fitness]) #todo calc fitness
-    return crm
+# apenas preenchendo uma lista com o id de cada cliente que depois
+# deve virar uma strig
+costumers = [i for i in range(1, qtd_costumers + 1)]
+
+# clientes com suas localidades vem do arquivo de teste
+clients = {0: [0, 0],
+           1: [82, 76],
+           2: [96, 44],
+           3: [50, 5],
+           4: [49, 8],
+           5: [13, 7],
+           6: [29, 89],
+           7: [58, 30],
+           8: [84, 39],
+           9: [14, 24],
+           10: [2,  39]}
 
 
 # Acao: Gera um indiviuo
 # parametros: qtd_vehicles, qtd_costumers
 def generate_individual(qtd_vehicles, qtd_costumers):
-    individual = []
-    for vehicle in range(qtd_vehicles):
-        individual.append(generate_cromossome(vehicle, qtd_costumers))
-    return np.array(individual)
+    vehicles = ['#' for _ in range(qtd_vehicles)]
+    individual = np.hstack((costumers, vehicles))
+    np.random.shuffle(individual)
+    return str(individual).replace("[", "").replace("]", "").replace("'", "")
 
 
-print(generate_individual(5, 10))
+# Acao: Calcula o fitness de um indivudo
+# parametros: individuo
+def crm_fit(individual):
+    routes = individual.split('#')
+    print(routes)
+
+
+# Acao: Gerar a matriz de distancias para não precisar calcular a distancia
+# para um cliente todas as vezes
+def gen_dist_matrix():
+    dist_matrix = np.zeros((qtd_costumers + 1, qtd_costumers + 1))
+    for i in range(qtd_costumers + 1):
+        for j in range(qtd_costumers + 1):
+            dist_matrix[i][j] = ec(clients[i], clients[j])
+    return dist_matrix
