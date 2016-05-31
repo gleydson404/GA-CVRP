@@ -10,7 +10,7 @@
 # todos os carros tem capacidades iguais
 #
 # Os parametros para a execucao geral do algoritmo
-# devem vir de um arquivo parameters.json que deve
+# devem vir de um arquivo conifg.json que deve
 # estar na mesma pasta que este script
 
 
@@ -19,11 +19,11 @@ from Distances import euclidian as ec
 import json
 
 #Lendo arquivo de configuracao .json
-with open("parameters.json") as json_file:
+with open("config.json") as json_file:
     parameters = json.load(json_file)
-    capacidade_veiculo = parameters['capacidade_veiculo']
-    print(capacidade_veiculo)
-#    json1_data = json.loads(json1_str)[0]
+    #capacidade_veiculo = parameters['capacidade_veiculo']
+    print(parameters)
+
 # parametro colocado aqui enquanto não é possivel ler o
 # arquivo de teste
 qtd_costumers = 10
