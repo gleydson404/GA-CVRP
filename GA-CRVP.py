@@ -22,11 +22,12 @@ import json
 with open("config.json") as json_file:
     parameters = json.load(json_file)
     #capacidade_veiculo = parameters['capacidade_veiculo']
-    print(parameters)
+    #print(parameters)
 
 # parametro colocado aqui enquanto não é possivel ler o
 # arquivo de teste
 qtd_costumers = 10
+qtd_vehicles = 5
 
 # apenas preenchendo uma lista com o id de cada cliente que depois
 # deve virar uma strig
@@ -48,8 +49,9 @@ clients = {0: [0, 0],
 
 # Acao: Gera um indiviuo
 # parametros: qtd_vehicles, qtd_costumers
+# FIX Gerando veículos+1
 def generate_individual(qtd_vehicles, qtd_costumers):
-    vehicles = ['#' for _ in range(qtd_vehicles)]
+    vehicles = ['#' for _ in range(qtd_vehicles - 1)]
     individual = np.hstack((costumers, vehicles))
     np.random.shuffle(individual)
     return individual
@@ -69,7 +71,7 @@ def crm_fit(individual, dist_matrix):
             if i == (qtd_costumers - 1):
                 distances.append(dist_matrix[i][0])
 
-    print(distances)
+    #print(distances)
 
 
 # Acao: Gerar a matriz de distancias para não precisar calcular a distancia
@@ -79,11 +81,36 @@ def gen_dist_matrix():
     for i in range(qtd_costumers + 1):
         for j in range(qtd_costumers + 1):
             dist_matrix[i][j] = ec(clients[i], clients[j])
+            #print dist_matrix
+    #print dist_matrix
     return dist_matrix
+
+# Acao: calcula distancia da rota
+def dist_veiculo(individual):
+    i = 0
+    vetor_distancias = []
+    dist_matrix = gen_dist_matrix()
+    for x in range(qtd_vehicles):
+        dist = 0
+        if x == (qtd_vehicles-1) and i >= len(individual):
+            vetor_distancias.append(0)
+            return vetor_distancias
+        if (individual[i] != "#"):
+            dist = dist + dist_matrix[0][int(individual[i])]
+            i = i + 1
+            while (i < len(individual) and individual[i] != "#"):
+                dist = dist + dist_matrix[int(individual[i-1])][int(individual[i])]
+                i = i + 1
+            dist = dist + dist_matrix[int(individual[i-1])][0]
+        vetor_distancias.append(dist)
+        i = i + 1
+    return vetor_distancias
 
 
 teste = generate_individual(5, 10)
 print(teste)
-dist_matrix = gen_dist_matrix()
-print(dist_matrix)
-print(crm_fit(teste, dist_matrix))
+distancia = dist_veiculo(teste)
+print distancia
+#dist_matrix = gen_dist_matrix()
+#print(dist_matrix)
+#print(crm_fit(teste, dist_matrix))
