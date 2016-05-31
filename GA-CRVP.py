@@ -19,7 +19,7 @@ from Distances import euclidian as ec
 
 # parametro colocado aqui enquanto não é possivel ler o
 # arquivo de teste
-qtd_costumers = 4
+qtd_costumers = 10
 
 # apenas preenchendo uma lista com o id de cada cliente que depois
 # deve virar uma strig
@@ -45,14 +45,24 @@ def generate_individual(qtd_vehicles, qtd_costumers):
     vehicles = ['#' for _ in range(qtd_vehicles)]
     individual = np.hstack((costumers, vehicles))
     np.random.shuffle(individual)
-    return str(individual).replace("[", "").replace("]", "").replace("'", "")
+    return individual
 
 
 # Acao: Calcula o fitness de um indivudo
 # parametros: individuo
-def crm_fit(individual):
-    routes = individual.split('#')
-    print(routes)
+# fix-me calcular direito o fitness de acordo com as sequencias de numeros 
+def crm_fit(individual, dist_matrix):
+    distances = []
+    for i in range(1, qtd_costumers):
+        if individual[i] != '#':
+            if i == 0:
+                distances.append(dist_matrix[0][i])
+            else:
+                distances.append(dist_matrix[i][i + 1])
+            if i == (qtd_costumers - 1):
+                distances.append(dist_matrix[i][0])
+
+    print(distances)
 
 
 # Acao: Gerar a matriz de distancias para não precisar calcular a distancia
@@ -63,3 +73,10 @@ def gen_dist_matrix():
         for j in range(qtd_costumers + 1):
             dist_matrix[i][j] = ec(clients[i], clients[j])
     return dist_matrix
+
+
+teste = generate_individual(5, 10)
+print(teste)
+dist_matrix = gen_dist_matrix()
+print(dist_matrix)
+print(crm_fit(teste, dist_matrix))
