@@ -16,7 +16,7 @@
 
 import numpy as np
 from Distances import euclidian as ec
-from load_tests import load
+from LoadTests import load
 import json
 
 # Lendo arquivo de configuracao .json
