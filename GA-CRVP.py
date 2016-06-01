@@ -49,7 +49,7 @@ def over_capacity(individual):
     over = 0
     for item in routes:
         vehicle_demand = 0
-        print('veiculo')
+        # print('veiculo')
         for inner in item:
             vehicle_demand += demands[int(inner)]
         if (capacity - vehicle_demand) < 0:
@@ -59,10 +59,15 @@ def over_capacity(individual):
 
 # Acao: Calcula o fitness de um indivudo
 # parametros: individuo
-def crm_fit(individual, dist_matrix):
-    # dist_vehicle = get_dist_vehicle(individual, get_dist_vehicle)
-    # total_cost = np.sum(dist_vehicle)
-    pass
+def fitness(individual, dist_matrix):
+    gama = 1
+    custo_total = np.sum(dist_veiculo(individual, dist_matrix))
+    estouro_total = np.sum(over_capacity(individual))
+    # gama = melhor / (((sum(dem/cap)*cap)/2)**2) * (geracao/num_geracoes)
+    # print gama
+    fitness = custo_total + gama * estouro_total
+    print "fitness do individuo ", individual, " : ", fitness
+    return fitness
 
 
 # Acao: Gerar a matriz de distancias para não precisar calcular a distancia
@@ -92,35 +97,42 @@ def get_routes_from_vehicle(individual):
 
 
 # Acao: calcula distancia da rota
-def get_dist_vehicle(individual, dist_matrix):
+def dist_veiculo(individual, dist_matrix):
     i = 0
     vetor_dist = []
-    dist_matrix = gen_dist_matrix()
+    # dist_matrix = gen_dist_matrix()
     for x in range(qtd_vehicles):
         dist = 0
+        # Verifica estouro de index, o que acontece caso a ultima rota seja 0
         if x == (qtd_vehicles - 1) and i >= len(individual):
             vetor_dist.append(0)
             return vetor_dist
+        # verifica o inicio de uma nova rota e calcula a distancia do deposito ao primeiro cliente
         if (individual[i] != "#"):
             dist = dist + dist_matrix[0][int(individual[i])]
             i = i + 1
+            # enquanto houver clientes nesta rota, a distancia entre eles eh somada
             while (i < len(individual) and individual[i] != "#"):
                 dist = dist + dist_matrix[int(individual[i - 1])][int(individual[i])]
                 i = i + 1
+            # verifica o termino de uma rota e calcula a distancia entre o ultimo cliente e o deposito
             dist = dist + dist_matrix[int(individual[i - 1])][0]
         vetor_dist.append(dist)
         i = i + 1
+    print vetor_dist
     return vetor_dist
 
 
 # teste = generate_individual(5, 10)
 # print(teste)
-# dist_matrix = gen_dist_matrix()
+dist_matrix = gen_dist_matrix()
 # distancia = dist_vehicle(teste, dist_matrix)
 # print(distancia)
 # teste = ['4',  '9',  '#',  '6',  '#',  '#',  '2',  '3',  '5',  '10',  '#', '7',  '1', '8']
-teste = ['5', '#', '7', '4', '9', '3', '6', '1', '2', '#', '8', '#', '10', '#']
-print(get_routes_from_vehicle(teste))
-print(over_capacity(teste))
+individuo = ['5', '#', '7', '4', '9', '3', '6', '1', '2', '#', '8', '#', '10', '#']
+print(get_routes_from_vehicle(individuo))
+print(over_capacity(individuo))
+print(fitness(individuo, dist_matrix))
+print capacity
 # print(dist_matrix)
 # print(crm_fit(teste, dist_matrix))
