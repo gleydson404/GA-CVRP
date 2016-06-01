@@ -34,17 +34,13 @@ capacity = 50
 costumers = [i for i in range(1, qtd_costumers + 1)]
 
 # clientes com suas localidades vem do arquivo de teste
-clients = {0: [0, 0],
-           1: [82, 76],
-           2: [96, 44],
-           3: [50, 5],
-           4: [49, 8],
-           5: [13, 7],
-           6: [29, 89],
-           7: [58, 30],
-           8: [84, 39],
-           9: [14, 24],
-           10: [2,  39]}
+# Lê arquivo de teste
+with open("test.json") as json_file:
+    tests = json.load(json_file)
+ids = [int(test) for test in tests]
+clients = {}
+for i in ids:
+    clients[ids[i]] = tests[str(ids[i])]
 
 demands = [0, 0, 19, 21, 6, 19, 7, 12, 16, 6, 16]
 
