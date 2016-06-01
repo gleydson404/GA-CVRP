@@ -36,7 +36,6 @@ demands = [0, 0, 19, 21, 6, 19, 7, 12, 16, 6, 16]
 
 # Acao: Gera um indiviuo
 # parametros: qtd_vehicles, qtd_costumers
-# FIX Gerando veículos+1
 def generate_individual(qtd_vehicles, qtd_costumers):
     vehicles = ['#' for _ in range(qtd_vehicles - 1)]
     individual = np.hstack((clients.keys()[1: len(clients)], vehicles))
@@ -44,6 +43,8 @@ def generate_individual(qtd_vehicles, qtd_costumers):
     return individual
 
 
+# Acao: Calcula a sobrecarga por veiculo e retorna a sobrecarga do individuo
+# Parametros: Individuo
 def over_capacity(individual):
     routes = get_routes_from_vehicle(individual)
     over = 0
@@ -58,16 +59,23 @@ def over_capacity(individual):
 
 
 # Acao: Calcula o fitness de um indivudo
-# parametros: individuo
-def fitness(individual, dist_matrix):
+# parametros: individuo, matriz de distancias
+def fitness_ind(individual, dist_matrix):
     gama = 1
     custo_total = np.sum(dist_veiculo(individual, dist_matrix))
     estouro_total = np.sum(over_capacity(individual))
-    # gama = melhor / (((sum(dem/cap)*cap)/2)**2) * (geracao/num_geracoes)
-    # print gama
     fitness = custo_total + gama * estouro_total
     print "fitness do individuo ", individual, " : ", fitness
     return fitness
+
+
+# Acao: Calcula o fitness da Populacao
+# Parametros: populacao
+def fitness_pop(populacao):
+	fitness_populacao = []
+	for individual in populacao:
+		fitness_populacao.append((fitness_ind(individual, dist_matrix), individual))
+	return fitness_populacao
 
 
 # Acao: Gerar a matriz de distancias para não precisar calcular a distancia
@@ -82,7 +90,9 @@ def gen_dist_matrix():
 
 # Acao: retorna uma lista com as rotas de um veiculo
 # parametros:
+# @Donegas: Alterei o individuo para lista para não precisar mexer no codigo, nao entendi a funcao do append '#'
 def get_routes_from_vehicle(individual):
+    individual = list(individual)
     individual.append('#')
     routes = []
     elesments = []
@@ -97,10 +107,10 @@ def get_routes_from_vehicle(individual):
 
 
 # Acao: calcula distancia da rota
+# Parametros: individuo e matriz de distancias
 def dist_veiculo(individual, dist_matrix):
     i = 0
     vetor_dist = []
-    # dist_matrix = gen_dist_matrix()
     for x in range(qtd_vehicles):
         dist = 0
         # Verifica estouro de index, o que acontece caso a ultima rota seja 0
@@ -122,6 +132,24 @@ def dist_veiculo(individual, dist_matrix):
     print vetor_dist
     return vetor_dist
 
+# =-=-=-=-=-=-=-=-=-=-=- OPERADORES =-=-=-=-=-=-=-=-=-=-=-=-=- #
+
+# Acao: Roleta para minimizacao
+# Parametro: Populacao
+def roleta(populacao):
+    fitness = [individuo[0] for individuo in populacao]
+    fitness_total = np.abs(np.sum(fitness))
+    max_fitness = np.abs(np.max(fitness))
+    min_fitness = np.abs(np.min(fitness))
+    aleatorio = np.random.uniform(0, fitness_total) # gera um valor aleatorio dentro do range fitness total
+    range_fitness = max_fitness + min_fitness # range entre maior e menor para usar na roleta de minimizacao
+    # Minimizacao = http://stackoverflow.com/questions/8760473/roulette-wheel-selection-for-function-minimization
+    for index in range(len(populacao)):
+        aleatorio -= (range_fitness - fitness[index]) # o range - o fitness do individuo eh subtraido do valor aleatorio gerado ate que este seja < 0
+        if aleatorio <= 0:
+            return populacao[index][1]
+    return populacao[len(populacao)-1][1]
+
 
 # teste = generate_individual(5, 10)
 # print(teste)
@@ -132,7 +160,18 @@ dist_matrix = gen_dist_matrix()
 individuo = ['5', '#', '7', '4', '9', '3', '6', '1', '2', '#', '8', '#', '10', '#']
 print(get_routes_from_vehicle(individuo))
 print(over_capacity(individuo))
-print(fitness(individuo, dist_matrix))
+# fitness_individuos = (fitness_ind(individuo, dist_matrix))
+populacao = [('5', '#', '7', '4', '9', '3', '6', '1', '2', '#', '8', '#', '10', '#'),
+             ('5', '#', '7', '4', '9', '3', '6', '1', '10', '#', '8', '#', '2', '#'),
+             ('5', '#', '7', '4', '9', '10', '6', '1', '2', '#', '8', '#', '3', '#'),
+             ('10', '#', '4', '9', '3', '6', '1', '2', '#', '8', '#', '5', '7', '#')]
+fitness_populacao = (fitness_pop(populacao))
+print fitness_populacao
+print "Roleta: ", (roleta(fitness_populacao))
 print capacity
 # print(dist_matrix)
 # print(crm_fit(teste, dist_matrix))
+num_geracoes = parameters['capacidade_veiculo']
+geracao = 1
+# gama = melhor / (((sum(dem/cap)*cap)/2)**2) * (geracao/num_geracoes)
+# print gama
