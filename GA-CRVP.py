@@ -18,17 +18,17 @@ import numpy as np
 from Distances import euclidian as ec
 import json
 
-#Lendo arquivo de configuracao .json
+# Lendo arquivo de configuracao .json
 with open("config.json") as json_file:
     parameters = json.load(json_file)
-    #capacidade_veiculo = parameters['capacidade_veiculo']
-    #print(parameters)
+    # capacidade_veiculo = parameters['capacidade_veiculo']
+    # print(parameters)
 
 # parametro colocado aqui enquanto não é possivel ler o
 # arquivo de teste
 qtd_costumers = 10
 qtd_vehicles = 5
-
+capacity = 50
 # apenas preenchendo uma lista com o id de cada cliente que depois
 # deve virar uma strig
 costumers = [i for i in range(1, qtd_costumers + 1)]
@@ -46,6 +46,8 @@ clients = {0: [0, 0],
            9: [14, 24],
            10: [2,  39]}
 
+demands = [0, 0, 19, 21, 6, 19, 7, 12, 16, 6, 16]
+
 
 # Acao: Gera um indiviuo
 # parametros: qtd_vehicles, qtd_costumers
@@ -57,21 +59,25 @@ def generate_individual(qtd_vehicles, qtd_costumers):
     return individual
 
 
+def over_capacity(individual):
+    routes = get_routes_from_vehicle(individual)
+    over = 0
+    for item in routes:
+        vehicle_demand = 0
+        print('veiculo')
+        for inner in item:
+            vehicle_demand += demands[int(inner)]
+        if (capacity - vehicle_demand) < 0:
+            over += capacity - vehicle_demand
+    return over
+
+
 # Acao: Calcula o fitness de um indivudo
 # parametros: individuo
-# fix-me calcular direito o fitness de acordo com as sequencias de numeros 
 def crm_fit(individual, dist_matrix):
-    distances = []
-    for i in range(1, qtd_costumers):
-        if individual[i] != '#':
-            if i == 0:
-                distances.append(dist_matrix[0][i])
-            else:
-                distances.append(dist_matrix[i][i + 1])
-            if i == (qtd_costumers - 1):
-                distances.append(dist_matrix[i][0])
-
-    #print(distances)
+    # dist_vehicle = get_dist_vehicle(individual, get_dist_vehicle)
+    # total_cost = np.sum(dist_vehicle)
+    pass
 
 
 # Acao: Gerar a matriz de distancias para não precisar calcular a distancia
@@ -81,36 +87,55 @@ def gen_dist_matrix():
     for i in range(qtd_costumers + 1):
         for j in range(qtd_costumers + 1):
             dist_matrix[i][j] = ec(clients[i], clients[j])
-            #print dist_matrix
-    #print dist_matrix
     return dist_matrix
 
+
+# Acao: retorna uma lista com as rotas de um veiculo
+# parametros:
+def get_routes_from_vehicle(individual):
+    individual.append('#')
+    routes = []
+    elesments = []
+    for i in range(len(individual)):
+        if individual[i] != '#':
+            elesments.append(individual[i])
+        else:
+            if elesments:
+                routes.append(elesments[:])
+                elesments[:] = []
+    return routes
+
+
 # Acao: calcula distancia da rota
-def dist_veiculo(individual):
+def get_dist_vehicle(individual, dist_matrix):
     i = 0
-    vetor_distancias = []
+    vetor_dist = []
     dist_matrix = gen_dist_matrix()
     for x in range(qtd_vehicles):
         dist = 0
-        if x == (qtd_vehicles-1) and i >= len(individual):
-            vetor_distancias.append(0)
-            return vetor_distancias
+        if x == (qtd_vehicles - 1) and i >= len(individual):
+            vetor_dist.append(0)
+            return vetor_dist
         if (individual[i] != "#"):
             dist = dist + dist_matrix[0][int(individual[i])]
             i = i + 1
             while (i < len(individual) and individual[i] != "#"):
-                dist = dist + dist_matrix[int(individual[i-1])][int(individual[i])]
+                dist = dist + dist_matrix[int(individual[i - 1])][int(individual[i])]
                 i = i + 1
-            dist = dist + dist_matrix[int(individual[i-1])][0]
-        vetor_distancias.append(dist)
+            dist = dist + dist_matrix[int(individual[i - 1])][0]
+        vetor_dist.append(dist)
         i = i + 1
-    return vetor_distancias
+    return vetor_dist
 
 
-teste = generate_individual(5, 10)
-print(teste)
-distancia = dist_veiculo(teste)
-print distancia
-#dist_matrix = gen_dist_matrix()
-#print(dist_matrix)
-#print(crm_fit(teste, dist_matrix))
+# teste = generate_individual(5, 10)
+# print(teste)
+# dist_matrix = gen_dist_matrix()
+# distancia = dist_vehicle(teste, dist_matrix)
+# print(distancia)
+# teste = ['4',  '9',  '#',  '6',  '#',  '#',  '2',  '3',  '5',  '10',  '#', '7',  '1', '8']
+teste = ['5', '#', '7', '4', '9', '3', '6', '1', '2', '#', '8', '#', '10', '#']
+print(get_routes_from_vehicle(teste))
+print(over_capacity(teste))
+# print(dist_matrix)
+# print(crm_fit(teste, dist_matrix))
