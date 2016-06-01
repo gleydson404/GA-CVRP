@@ -41,7 +41,7 @@ ids = [int(test) for test in tests]
 clients = {}
 for i in ids:
     clients[ids[i]] = tests[str(ids[i])]
-
+# fix-me adicionei mais um 0 referente ao deposito tem que ver como vai ficar 
 demands = [0, 0, 19, 21, 6, 19, 7, 12, 16, 6, 16]
 
 
