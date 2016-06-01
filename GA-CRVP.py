@@ -16,6 +16,7 @@
 
 import numpy as np
 from Distances import euclidian as ec
+from load_tests import load
 import json
 
 # Lendo arquivo de configuracao .json
@@ -24,24 +25,12 @@ with open("config.json") as json_file:
     # capacidade_veiculo = parameters['capacidade_veiculo']
     # print(parameters)
 
-# parametro colocado aqui enquanto não é possivel ler o
-# arquivo de teste
-qtd_costumers = 10
-qtd_vehicles = 5
-capacity = 50
-# apenas preenchendo uma lista com o id de cada cliente que depois
-# deve virar uma strig
-costumers = [i for i in range(1, qtd_costumers + 1)]
 
 # clientes com suas localidades vem do arquivo de teste
 # Lê arquivo de teste
-with open("test.json") as json_file:
-    tests = json.load(json_file)
-ids = [int(test) for test in tests]
-clients = {}
-for i in ids:
-    clients[ids[i]] = tests[str(ids[i])]
+clients, qtd_costumers, qtd_vehicles, capacity = load('tests/A-n10-k5.vrp')
 
+# a demanda ja esta vindo como a terceira posicao de cada cliente, não mudei por que o sono bateu
 demands = [0, 0, 19, 21, 6, 19, 7, 12, 16, 6, 16]
 
 
@@ -50,7 +39,7 @@ demands = [0, 0, 19, 21, 6, 19, 7, 12, 16, 6, 16]
 # FIX Gerando veículos+1
 def generate_individual(qtd_vehicles, qtd_costumers):
     vehicles = ['#' for _ in range(qtd_vehicles - 1)]
-    individual = np.hstack((costumers, vehicles))
+    individual = np.hstack((clients.keys()[1: len(clients)], vehicles))
     np.random.shuffle(individual)
     return individual
 

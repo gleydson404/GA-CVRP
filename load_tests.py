@@ -5,6 +5,7 @@ def load(file):
     clients = {}
     qtd_clients = 0
     qtd_trucks = 0
+    capacity = 0
     count = 0
     cord = False
     demand = False
@@ -20,6 +21,8 @@ def load(file):
                 x += 1
         if 'DIMENSION' in i:
             qtd_clients = int(''.join(([x for x in i if x.isdigit()])))
+        if 'CAPACITY' in i:
+            capacity = int(''.join(([x for x in i if x.isdigit()])))
         if 'DEPOT_SECTION' in i:
             demand = False
             cord = False
@@ -39,7 +42,7 @@ def load(file):
             cord = True
     f.close()
     clients[0] = np.array([0, 0, 0])
-    return clients, qtd_clients, int(qtd_trucks)
+    return clients, qtd_clients, int(qtd_trucks), capacity
 
 # print load('tests/A-n10-k5.vrp')
 
