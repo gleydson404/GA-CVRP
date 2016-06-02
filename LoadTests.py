@@ -6,19 +6,12 @@ def load(file):
     qtd_clients = 0
     qtd_trucks = 0
     capacity = 0
-    count = 0
     cord = False
     demand = False
     f = open(str(file), 'r')
     for i in f:
         if 'COMMENT' in i:
-            x = 0
-            while count < 2:
-                if i[x].isdigit():
-                    qtd_trucks = str(qtd_trucks) + i[x]
-                if i[x] == ',':
-                    count += 1
-                x += 1
+            qtd_trucks = int(''.join(([x for x in i[i.find(',') + 1: len(i)][0: i.find(',')] if x.isdigit()])))
         if 'DIMENSION' in i:
             qtd_clients = int(''.join(([x for x in i if x.isdigit()])))
         if 'CAPACITY' in i:
