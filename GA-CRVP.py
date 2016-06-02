@@ -17,6 +17,7 @@
 import numpy as np
 from Distances import euclidian as ec
 from LoadTests import load
+from random import random, randint, uniform, choice
 import json
 
 
@@ -89,10 +90,6 @@ def gen_dist_matrix(qtd_customers, qtd_vehicles, customers):
 
 # Acao: retorna uma lista com as rotas de um veiculo
 # parametros:
-# @Donegas: Alterei o individuo para lista para não precisar
-# mexer no codigo, nao entendi a funcao do append '#'
-# @gleydson404 Han?
-# fix-me
 def get_routes_from_vehicle(individual):
     individual = list(individual)
     individual.append('#')
@@ -131,7 +128,7 @@ def dist_veiculo(ind, dist_matrix, qtd_customers, qtd_vehicles):
                 i = i + 1
             # verifica o termino de uma rota e calcula a distancia
             # entre o ultimo cliente e o deposito
-            dist = dist + dist_matrix[int(ind[i - 1])][0]
+        dist = dist + dist_matrix[int(ind[i - 1])][0]
         vetor_dist.append(dist)
         i = i + 1
     return vetor_dist
@@ -162,9 +159,21 @@ def horizontal_line_cross(father, mother):
 def uniform_cross(father, mother):
     pass
 
-
-def simple_random_mut(ind):
-    pass
+# Acao: Mutacao Swap: troca genes entre 2 pontos (Tese de 2008)
+# Acho que seria mais facil usar a representação por rotas, mas precisariamos de uma
+# funcao que converta as rotas para individuo novamente, nao sei se compensa
+def mutacao_swap(individual):
+    pontos = []
+    while len(pontos) < 2:
+        ponto = randint(0, len(individual) - 1)
+        if (individual[ponto] == "#"):
+            ponto = randint(0, len(individual) - 1)
+        if (individual[ponto] != "#"):
+            pontos.append(ponto)
+    aux = individual[pontos[0]]
+    individual[pontos[0]] = individual[pontos[1]]
+    individual[pontos[1]] = aux
+    return individual
 
 
 def evolve():
@@ -204,3 +213,8 @@ if __name__ == '__main__':
 
     for i in range(params['geracoes']):
         pop = evolve()  # fixme fazer função evolve 
+
+individual = ['5','4','#','3','8','1','9','#','#','#','2','6','7']
+print "individuo: ", individual
+individuo_mutado = (mutacao_swap(individual))
+print "individuo: ", individuo_mutado
