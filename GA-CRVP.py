@@ -216,5 +216,4 @@ if __name__ == '__main__':
 
 individual = ['5','4','#','3','8','1','9','#','#','#','2','6','7']
 print "individuo: ", individual
-individuo_mutado = (mutacao_swap(individual))
-print "individuo: ", individuo_mutado
+print "individuo: ", (mutacao_swap(individual))
