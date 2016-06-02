@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # Representacao do invididuo deve serguir a forma:
 
-# [custumer1, costumer2, costumer3, #, costumer4, costumer5, #]
+# [custumer1, customer2, customer3, #, costumer4, costumer5, #]
 # para 2 carros
-# [costumer1, costumer2, costumer3, costumer4, #, # ]
+# [customer1, customer2, costumer3, costumer4, #, # ]
 # também para 2 carros, mas nesse caso, apenas 1 carro tem rota
 
 # Estao sendo utilizados # como separadores porque consideramos que
@@ -28,17 +28,17 @@ def load_parameters(file):
 
 
 # Acao: Gera um indiviuo
-# parametros: qtd_vehicles, qtd_costumers
-def gen_ind(qtd_vehicles, qtd_costumers, costumers_list):
+# parametros: qtd_vehicles, qtd_customers
+def gen_ind(qtd_vehicles, qtd_customers, customers_list):
     vehicles = ['#' for _ in range(qtd_vehicles - 1)]
-    individual = np.hstack((costumers_list, vehicles))
+    individual = np.hstack((customers_list, vehicles))
     np.random.shuffle(individual)
     return individual
 
 
 # Acao: Gera a populacao baseado na funcao de geracao de individuos
-def gen_pop(size, qtd_vehicles, qtd_costumers, costumers_list):
-    return [gen_ind(qtd_vehicles, qtd_costumers, costumers_list) for _ in range(size)]
+def gen_pop(size, qtd_vehicles, qtd_customers, customers_list):
+    return [gen_ind(qtd_vehicles, qtd_customers, customers_list) for _ in range(size)]
 
 
 # Acao: Calcula a sobrecarga por veiculo e retorna a sobrecarga do individuo
@@ -77,11 +77,11 @@ def fitness_pop(populacao, dist_matrix):
 
 # Acao: Gerar a matriz de distancias para não precisar calcular a distancia
 # para um cliente todas as vezes
-def gen_dist_matrix(qtd_costumers, qtd_vehicles, costumers):
-    dist_matrix = np.zeros((qtd_costumers + 1, qtd_costumers + 1))
-    for i in range(qtd_costumers + 1):
-        for j in range(qtd_costumers + 1):
-            dist_matrix[i][j] = ec(costumers[i], costumers[j])
+def gen_dist_matrix(qtd_customers, qtd_vehicles, customers):
+    dist_matrix = np.zeros((qtd_customers + 1, qtd_customers + 1))
+    for i in range(qtd_customers + 1):
+        for j in range(qtd_customers + 1):
+            dist_matrix[i][j] = ec(customers[i], customers[j])
     return dist_matrix
 
 
@@ -108,7 +108,7 @@ def get_routes_from_vehicle(individual):
 
 # Acao: calcula distancia da rota
 # Parametros: individuo e matriz de distancias
-def dist_veiculo(ind, dist_matrix, qtd_costumers, qtd_vehicles):
+def dist_veiculo(ind, dist_matrix, qtd_customers, qtd_vehicles):
     i = 0
     vetor_dist = []
     for x in range(qtd_vehicles):
@@ -190,9 +190,9 @@ def roleta(populacao):
 if __name__ == '__main__':
     # clientes com suas localidades vem do arquivo de teste
     # Lê arquivo de teste
-    costumers, qtd_costumers, qtd_vehicles, capacity = load('tests/A-n10-k5.vrp')
+    customers, qtd_customers, qtd_vehicles, capacity = load('tests/A-n10-k5.vrp')
     params = load_parameters("config.json")
 
-    dist_matrix = gen_dist_matrix(qtd_costumers, qtd_vehicles, costumers)
+    dist_matrix = gen_dist_matrix(qtd_customers, qtd_vehicles, customers)
     for i in range(params['geracoes']):
-        pop = gen_pop(params['tamanho_pop'], qtd_vehicles, qtd_costumers, costumers.keys()[1: len(costumers)])
+        pop = gen_pop(params['tamanho_pop'], qtd_vehicles, qtd_customers, customers.keys()[1: len(costumers)])
