@@ -19,35 +19,32 @@ from Distances import euclidian as ec
 from LoadTests import load
 import json
 
+
 # Lendo arquivo de configuracao .json
-with open("config.json") as json_file:
-    parameters = json.load(json_file)
-    # capacidade_veiculo = parameters['capacidade_veiculo']
-    # print(parameters)
-
-
-# clientes com suas localidades vem do arquivo de teste
-# Lê arquivo de teste
-clients, qtd_costumers, qtd_vehicles, capacity = load('tests/A-n10-k5.vrp')
-
-
-# fix-me adicionei mais um 0 referente ao deposito tem que ver como vai ficar 
-# a demanda ja esta vindo como a terceira posicao de cada cliente, não mudei por que o sono bateu
-demands = [0, 0, 19, 21, 6, 19, 7, 12, 16, 6, 16]
+def load_parameters(file):
+    with open(file) as json_file:
+        parameters = json.load(json_file)
+        return parameters
 
 
 # Acao: Gera um indiviuo
 # parametros: qtd_vehicles, qtd_costumers
-def generate_individual(qtd_vehicles, qtd_costumers):
+def gen_ind(qtd_vehicles, qtd_costumers):
     vehicles = ['#' for _ in range(qtd_vehicles - 1)]
-    individual = np.hstack((clients.keys()[1: len(clients)], vehicles))
+# aqui alex que tem que mudar..
+    individual = np.hstack((clients.keys()[1: len(qtd_costumers)], vehicles))
     np.random.shuffle(individual)
     return individual
 
 
+# Acao: Gera a populacao baseado na funcao de geracao de individuos
+def gen_pop(size, qtd_vehicles, qtd_costumers):
+    return [gen_ind(qtd_vehicles, qtd_costumers) for _ in range(size)]
+
+
 # Acao: Calcula a sobrecarga por veiculo e retorna a sobrecarga do individuo
 # Parametros: Individuo
-def over_capacity(individual):
+def over_capacity(individual, demands, capacity):
     routes = get_routes_from_vehicle(individual)
     over = 0
     for item in routes:
@@ -67,32 +64,34 @@ def fitness_ind(individual, dist_matrix):
     custo_total = np.sum(dist_veiculo(individual, dist_matrix))
     estouro_total = np.sum(over_capacity(individual))
     fitness = custo_total + gama * estouro_total
-    print "fitness do individuo ", individual, " : ", fitness
     return fitness
 
 
 # Acao: Calcula o fitness da Populacao
 # Parametros: populacao
-def fitness_pop(populacao):
-	fitness_populacao = []
-	for individual in populacao:
-		fitness_populacao.append((fitness_ind(individual, dist_matrix), individual))
-	return fitness_populacao
+def fitness_pop(populacao, dist_matrix):
+    fit_pop = []
+    for individual in populacao:
+        fit_pop.append((fitness_ind(individual, dist_matrix), individual))
+    return fit_pop
 
 
 # Acao: Gerar a matriz de distancias para não precisar calcular a distancia
 # para um cliente todas as vezes
-def gen_dist_matrix():
+def gen_dist_matrix(qtd_costumers, qtd_vehicles, costumers):
     dist_matrix = np.zeros((qtd_costumers + 1, qtd_costumers + 1))
     for i in range(qtd_costumers + 1):
         for j in range(qtd_costumers + 1):
-            dist_matrix[i][j] = ec(clients[i], clients[j])
+            dist_matrix[i][j] = ec(costumers[i], costumers[j])
     return dist_matrix
 
 
 # Acao: retorna uma lista com as rotas de um veiculo
 # parametros:
-# @Donegas: Alterei o individuo para lista para não precisar mexer no codigo, nao entendi a funcao do append '#'
+# @Donegas: Alterei o individuo para lista para não precisar
+# mexer no codigo, nao entendi a funcao do append '#'
+# @gleydson404 Han?
+# fix-me
 def get_routes_from_vehicle(individual):
     individual = list(individual)
     individual.append('#')
@@ -110,31 +109,62 @@ def get_routes_from_vehicle(individual):
 
 # Acao: calcula distancia da rota
 # Parametros: individuo e matriz de distancias
-def dist_veiculo(individual, dist_matrix):
+def dist_veiculo(ind, dist_matrix, qtd_costumers, qtd_vehicles):
     i = 0
     vetor_dist = []
     for x in range(qtd_vehicles):
         dist = 0
         # Verifica estouro de index, o que acontece caso a ultima rota seja 0
-        if x == (qtd_vehicles - 1) and i >= len(individual):
+        if x == (qtd_vehicles - 1) and i >= len(ind):
             vetor_dist.append(0)
             return vetor_dist
-        # verifica o inicio de uma nova rota e calcula a distancia do deposito ao primeiro cliente
-        if (individual[i] != "#"):
-            dist = dist + dist_matrix[0][int(individual[i])]
+        # verifica o inicio de uma nova rota e calcula a distancia
+        # do deposito ao primeiro cliente
+        if (ind[i] != "#"):
+            dist = dist + dist_matrix[0][int(ind[i])]
             i = i + 1
-            # enquanto houver clientes nesta rota, a distancia entre eles eh somada
-            while (i < len(individual) and individual[i] != "#"):
-                dist = dist + dist_matrix[int(individual[i - 1])][int(individual[i])]
+            # enquanto houver clientes nesta rota, a distancia
+            # entre eles eh somada
+            while (i < len(ind) and ind[i] != "#"):
+                dist = dist + dist_matrix[int(ind[i - 1])][int(ind[i])]
                 i = i + 1
-            # verifica o termino de uma rota e calcula a distancia entre o ultimo cliente e o deposito
-            dist = dist + dist_matrix[int(individual[i - 1])][0]
+            # verifica o termino de uma rota e calcula a distancia
+            # entre o ultimo cliente e o deposito
+            dist = dist + dist_matrix[int(ind[i - 1])][0]
         vetor_dist.append(dist)
         i = i + 1
-    print vetor_dist
     return vetor_dist
 
 # =-=-=-=-=-=-=-=-=-=-=- OPERADORES =-=-=-=-=-=-=-=-=-=-=-=-=- #
+
+
+def simple_one_poins_cross(father, mother):
+    pass
+
+
+def simple_two_poins_cross(father, mother):
+    pass
+
+
+def simple_random_cross(father, mother):
+    pass
+
+
+def biggest_overlap_cross(father, mother):
+    pass
+
+
+def horizontal_line_cross(father, mother):
+    pass
+
+
+def uniform_cross(father, mother):
+    pass
+
+
+def simple_random_mut(ind):
+    pass
+
 
 # Acao: Roleta para minimizacao
 # Parametro: Populacao
@@ -143,37 +173,29 @@ def roleta(populacao):
     fitness_total = np.abs(np.sum(fitness))
     max_fitness = np.abs(np.max(fitness))
     min_fitness = np.abs(np.min(fitness))
-    aleatorio = np.random.uniform(0, fitness_total) # gera um valor aleatorio dentro do range fitness total
-    range_fitness = max_fitness + min_fitness # range entre maior e menor para usar na roleta de minimizacao
-    # Minimizacao = http://stackoverflow.com/questions/8760473/roulette-wheel-selection-for-function-minimization
+    # gera um valor aleatorio dentro do range fitness total
+    aleatorio = np.random.uniform(0, fitness_total)
+    # range entre maior e menor para usar na roleta de minimizacao
+    range_fitness = max_fitness + min_fitness
+    # Minimizacao = http://stackoverflow.com/questions/8760473/
+    # roulette-wheel-selection-for-function-minimization
     for index in range(len(populacao)):
-        aleatorio -= (range_fitness - fitness[index]) # o range - o fitness do individuo eh subtraido do valor aleatorio gerado ate que este seja < 0
+        # o range - o fitness do individuo eh subtraido do valor
+        # aleatorio gerado ate que este seja < 0
+        aleatorio -= (range_fitness - fitness[index])
         if aleatorio <= 0:
             return populacao[index][1]
     return populacao[len(populacao)-1][1]
 
 
-# teste = generate_individual(5, 10)
-# print(teste)
-dist_matrix = gen_dist_matrix()
-# distancia = dist_vehicle(teste, dist_matrix)
-# print(distancia)
-# teste = ['4',  '9',  '#',  '6',  '#',  '#',  '2',  '3',  '5',  '10',  '#', '7',  '1', '8']
-individuo = ['5', '#', '7', '4', '9', '3', '6', '1', '2', '#', '8', '#', '10', '#']
-print(get_routes_from_vehicle(individuo))
-print(over_capacity(individuo))
-# fitness_individuos = (fitness_ind(individuo, dist_matrix))
-populacao = [('5', '#', '7', '4', '9', '3', '6', '1', '2', '#', '8', '#', '10', '#'),
-             ('5', '#', '7', '4', '9', '3', '6', '1', '10', '#', '8', '#', '2', '#'),
-             ('5', '#', '7', '4', '9', '10', '6', '1', '2', '#', '8', '#', '3', '#'),
-             ('10', '#', '4', '9', '3', '6', '1', '2', '#', '8', '#', '5', '7', '#')]
-fitness_populacao = (fitness_pop(populacao))
-print fitness_populacao
-print "Roleta: ", (roleta(fitness_populacao))
-print capacity
-# print(dist_matrix)
-# print(crm_fit(teste, dist_matrix))
-num_geracoes = parameters['capacidade_veiculo']
-geracao = 1
-# gama = melhor / (((sum(dem/cap)*cap)/2)**2) * (geracao/num_geracoes)
-# print gama
+def main():
+    # clientes com suas localidades vem do arquivo de teste
+    # Lê arquivo de teste
+    costumers, qtd_costumers, qtd_vehicles, capacity = load('tests/A-n10-k5.vrp')
+
+    params = load_parameters("config.json")
+
+    dist_matrix = gen_dist_matrix(costumers, qtd_costumers, qtd_vehicles)
+
+    for i in range(params['geracoes']):
+        pop = gen_pop(qtd_costumers)
