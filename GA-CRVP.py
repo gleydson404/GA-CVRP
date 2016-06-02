@@ -29,16 +29,18 @@ def load_parameters(file):
 
 # Acao: Gera um indiviuo
 # parametros: qtd_vehicles, qtd_customers
-def gen_ind(qtd_vehicles, qtd_customers, customers_list):
+def gen_ind(qtd_vehicles, qtd_customers, cstrs_list):
+    # fixme vehicles vai ser gerado para cada individuo tirar
+    # de dentro da funcao e passar como parametro
     vehicles = ['#' for _ in range(qtd_vehicles - 1)]
-    individual = np.hstack((customers_list, vehicles))
+    individual = np.hstack((cstrs_list, vehicles))
     np.random.shuffle(individual)
     return individual
 
 
 # Acao: Gera a populacao baseado na funcao de geracao de individuos
-def gen_pop(size, qtd_vehicles, qtd_customers, customers_list):
-    return [gen_ind(qtd_vehicles, qtd_customers, customers_list) for _ in range(size)]
+def gen_pop(size, qtd_vcls, qtd_cstrs, cstrs_list):
+    return [gen_ind(qtd_vcls, qtd_cstrs, cstrs_list) for _ in range(size)]
 
 
 # Acao: Calcula a sobrecarga por veiculo e retorna a sobrecarga do individuo
@@ -165,6 +167,10 @@ def simple_random_mut(ind):
     pass
 
 
+def evolve():
+    pass
+
+
 # Acao: Roleta para minimizacao
 # Parametro: Populacao
 def roleta(populacao):
@@ -191,8 +197,10 @@ if __name__ == '__main__':
     # clientes com suas localidades vem do arquivo de teste
     # Lê arquivo de teste
     customers, qtd_customers, qtd_vehicles, capacity = load('tests/A-n10-k5.vrp')
+    cstrs_list = customers.keys()[1: len(customers)]
     params = load_parameters("config.json")
-
+    pop = gen_pop(params['tamanho_pop'], qtd_vehicles, qtd_customers, cstrs_list)
     dist_matrix = gen_dist_matrix(qtd_customers, qtd_vehicles, customers)
+
     for i in range(params['geracoes']):
-        pop = gen_pop(params['tamanho_pop'], qtd_vehicles, qtd_customers, customers.keys()[1: len(costumers)])
+        pop = evolve()  # fixme fazer função evolve 
