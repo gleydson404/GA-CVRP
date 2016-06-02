@@ -29,17 +29,16 @@ def load_parameters(file):
 
 # Acao: Gera um indiviuo
 # parametros: qtd_vehicles, qtd_costumers
-def gen_ind(qtd_vehicles, qtd_costumers):
+def gen_ind(qtd_vehicles, qtd_costumers, costumers_list):
     vehicles = ['#' for _ in range(qtd_vehicles - 1)]
-# aqui alex que tem que mudar..
-    individual = np.hstack((clients.keys()[1: len(qtd_costumers)], vehicles))
+    individual = np.hstack((costumers_list, vehicles))
     np.random.shuffle(individual)
     return individual
 
 
 # Acao: Gera a populacao baseado na funcao de geracao de individuos
-def gen_pop(size, qtd_vehicles, qtd_costumers):
-    return [gen_ind(qtd_vehicles, qtd_costumers) for _ in range(size)]
+def gen_pop(size, qtd_vehicles, qtd_costumers, costumers_list):
+    return [gen_ind(qtd_vehicles, qtd_costumers, costumers_list) for _ in range(size)]
 
 
 # Acao: Calcula a sobrecarga por veiculo e retorna a sobrecarga do individuo
@@ -188,14 +187,12 @@ def roleta(populacao):
     return populacao[len(populacao)-1][1]
 
 
-def main():
+if __name__ == '__main__':
     # clientes com suas localidades vem do arquivo de teste
     # Lê arquivo de teste
     costumers, qtd_costumers, qtd_vehicles, capacity = load('tests/A-n10-k5.vrp')
-
     params = load_parameters("config.json")
 
-    dist_matrix = gen_dist_matrix(costumers, qtd_costumers, qtd_vehicles)
-
+    dist_matrix = gen_dist_matrix(qtd_costumers, qtd_vehicles, costumers)
     for i in range(params['geracoes']):
-        pop = gen_pop(qtd_costumers)
+        pop = gen_pop(params['tamanho_pop'], qtd_vehicles, qtd_costumers, costumers.keys()[1: len(costumers)])

@@ -35,7 +35,7 @@ def load(file):
             cord = True
     f.close()
     clients[0] = np.array([0, 0, 0])
-    return clients, qtd_clients, int(qtd_trucks), capacity
+    return clients, int(qtd_clients), int(qtd_trucks), int(capacity)
 
 # print load('tests/A-n10-k5.vrp')
 
