@@ -104,6 +104,22 @@ def get_routes_from_vehicle(individual):
                 elesments[:] = []
     return routes
 
+# Acao: retorna um individuo a partir de suas rotas
+# FIX-ME estou com dificuldade para reorganizar o vetor: um individuo de 5
+# veiculos sempre tera no maximo 4 #, certo? Desta forma, as rotas vazias
+# ficam no final, nao to sabendo lidar nao sei se isso vai atrapalhar alguma
+# coisa... e nao sei se deixo com qtd_vehicles ou qtd_vehicles - 1 de #
+def get_individual_from_vehicle(routes):
+    qtd_veiculos_rota = len(routes)
+    dif_veiculos =  qtd_vehicles - qtd_veiculos_rota - 1
+    individuo = []
+    for i in range(len(routes)):
+        individuo.extend(list(routes[i]))
+        individuo.extend('#')
+    while dif_veiculos > 0:
+        individuo.extend('#')
+        dif_veiculos = dif_veiculos - 1
+    return list(individuo)
 
 # Acao: calcula distancia da rota
 # Parametros: individuo e matriz de distancias
@@ -165,9 +181,9 @@ def uniform_cross(father, mother):
 def mutacao_swap(individual):
     pontos = []
     while len(pontos) < 2:
-        ponto = randint(0, len(individual) - 1)
+        ponto = randint(0, len(individual)-1)
         if (individual[ponto] == "#"):
-            ponto = randint(0, len(individual) - 1)
+            ponto = randint(0, len(individual)-1)
         if (individual[ponto] != "#"):
             pontos.append(ponto)
     aux = individual[pontos[0]]
@@ -175,6 +191,17 @@ def mutacao_swap(individual):
     individual[pontos[1]] = aux
     return individual
 
+
+# Acao: "Mutacao" do tipo Reversa, tese de 2004 (pag 27)
+def mutacao_reversa(individual):
+    rotas = get_routes_from_vehicle(individual)
+    veiculo = randint(0, len(rotas)-1)
+    rota = rotas[veiculo]
+    rota_aux = []
+    for cliente in range(len(rota)):
+        rota_aux.extend(rota[len(rota)-1-cliente])
+    rotas[veiculo] = rota_aux
+    return get_individual_from_vehicle(rotas)
 
 def evolve():
     pass
@@ -217,3 +244,6 @@ if __name__ == '__main__':
 individual = ['5','4','#','3','8','1','9','#','#','#','2','6','7']
 print "individuo: ", individual
 print "individuo: ", (mutacao_swap(individual))
+teste = (get_routes_from_vehicle(individual))
+print "individuo: ", (get_individual_from_vehicle(teste))
+print "individuo: ", mutacao_reversa(individual)
