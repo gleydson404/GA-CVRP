@@ -17,7 +17,7 @@
 import numpy as np
 from Distances import euclidian as ec
 from LoadTests import load
-from random import random, randint, uniform, choice
+from random import randint, choice
 import json
 
 
@@ -46,8 +46,9 @@ def gen_pop(size, qtd_vcls, qtd_cstrs, cstrs_list):
 
 # Acao: Calcula a sobrecarga por veiculo e retorna a sobrecarga do individuo
 # Parametros: Individuo
+# fix-me usar a função que calcula overcapacity por rota dentro dessa
 def over_capacity(individual, demands, capacity):
-    routes = get_routes_from_vehicle(individual)
+    routes = get_routes_per_vehicle(individual)
     over = 0
     for item in routes:
         vehicle_demand = 0
@@ -59,10 +60,28 @@ def over_capacity(individual, demands, capacity):
     return over
 
 
+# Acao: calcula o estou por rota
+# parametros: assinatura da funcao é clara
+def over_capacity_per_route(route, demands, capacity):
+    dem = []
+    for item in route:
+        dem.append(demands[int(item)])
+
+    total_demand = np.sum(dem)
+    over = capacity - total_demand
+    if over >= 0:
+        return 0
+    else:
+        return over
+
+
 # Acao: Calcula o fitness de um indivudo
 # parametros: individuo, matriz de distancias
-def fitness_ind(individual, dist_matrix):
-    gama = 1
+# fix-me @Donegas pra você não reclamar que eu mexi na sua
+# funcao, eu não modifiquei ela, só coloquei o alfa
+# como parametro por que eu presciso usar ele em
+# outra funcao, e pra gente nao trabalhar com alfas diferente
+def fitness_ind(individual, dist_matrix, gama):
     # gama = melhor / (((sum(dem/cap)*cap)/2)**2) * (geracao/num_geracoes)
     custo_total = np.sum(dist_veiculo(individual, dist_matrix))
     estouro_total = np.sum(over_capacity(individual))
@@ -72,10 +91,10 @@ def fitness_ind(individual, dist_matrix):
 
 # Acao: Calcula o fitness da Populacao
 # Parametros: populacao
-def fitness_pop(populacao, dist_matrix):
+def fitness_pop(populacao, dist_matrix, gama):
     fit_pop = []
-    for individual in populacao:
-        fit_pop.append((fitness_ind(individual, dist_matrix), individual))
+    for ind in populacao:
+        fit_pop.append((fitness_ind(ind, dist_matrix, gama), ind))
     return fit_pop
 
 
@@ -91,7 +110,7 @@ def gen_dist_matrix(qtd_customers, qtd_vehicles, customers):
 
 # Acao: retorna uma lista com as rotas de um veiculo
 # parametros:
-def get_routes_from_vehicle(individual):
+def get_routes_per_vehicle(individual):
     individual = list(individual)
     individual.append('#')
     routes = []
@@ -105,11 +124,13 @@ def get_routes_from_vehicle(individual):
                 elesments[:] = []
     return routes
 
+
 # Acao: retorna um individuo a partir de suas rotas
-# Parametros: Recebe rotas e devolve individuo, preenchendo com # no final as rotas vazias
+# Parametros: Recebe rotas e devolve individuo,
+# preenchendo com # no final as rotas vazias
 def get_individual_from_vehicle(routes):
     qtd_veiculos_rota = len(routes)
-    dif_veiculos =  qtd_vehicles - qtd_veiculos_rota - 1
+    dif_veiculos = qtd_vehicles - qtd_veiculos_rota - 1
     individual = []
     for i in range(len(routes)):
         individual.extend(list(routes[i]))
@@ -122,6 +143,7 @@ def get_individual_from_vehicle(routes):
     if individual.count('#') < (qtd_vehicles-1):
         individual.extend('#')
     return list(individual)
+
 
 # Acao: calcula distancia da rota
 # Parametros: individuo e matriz de distancias
@@ -154,11 +176,11 @@ def dist_veiculo(ind, dist_matrix, qtd_customers, qtd_vehicles):
 
 # =-=-=-=-=-=-=-=-=-=-=- OPERADORES =-=-=-=-=-=-=-=-=-=-=-=-=- #
 
-def simple_one_poins_cross(father, mother):
+def simple_one_point_cross(father, mother):
     pass
 
 
-def simple_two_poins_cross(father, mother):
+def simple_two_points_cross(father, mother):
     pass
 
 
@@ -174,8 +196,22 @@ def horizontal_line_cross(father, mother):
     pass
 
 
+# Acao: calcula o R para o crossover uniform segundo a tese de 2004
+# retorna um vetor com os valores R por rota/veiculo
+# parametros assinatura da funcao é bastante clara
+def calc_r(ind, dist_matrix, qtd_customers, qtd_vehicles, gama):
+    routes_cost = dist_veiculo(ind, dist_matrix, qtd_customers, qtd_vehicles)
+    routes = get_routes_per_vehicle(ind)
+    r_per_vehicle = []
+    for i in range(routes):
+        fit = routes_cost[i] + gama * over_capacity_per_route(routes[i])
+        r_per_vehicle.append(fit / qtd_customers)
+    return r_per_vehicle
+
+
 def uniform_cross(father, mother):
     pass
+
 
 # Acao: Mutacao Swap: troca genes entre 2 pontos (Tese de 2008)
 # Parametros: recebe e devolve o mesmo individuo
@@ -195,7 +231,7 @@ def swap_mutation(individual):
 
 # Acao: "Mutacao" do tipo Reversa, tese de 2004 (pag 27)
 def reverse_mutation(individual):
-    rotas = get_routes_from_vehicle(individual)
+    rotas = get_routes_per_vehicle(individual)
     veiculo = randint(0, len(rotas)-1)
     rota = rotas[veiculo]
     rota_aux = []
@@ -209,7 +245,7 @@ def reverse_mutation(individual):
 # tese de 2004 secao 4.3.1
 def simple_mutation(individual):
     # sorteia um veiculo e um cliente e o deleta
-    rotas = get_routes_from_vehicle(individual)
+    rotas = get_routes_per_vehicle(individual)
     veiculo = randint(0, len(rotas)-1)
     cliente = choice(rotas[veiculo])
     rotas[veiculo].remove(cliente)
@@ -223,10 +259,10 @@ def simple_mutation(individual):
     return get_individual_from_vehicle(rotas)
 
 
-
 # Acao: Dado um vetor de clientes (rota) e um cliente de partida
 # retorna o cliente de menor distancia ate ele
-# Parametros: uma rota e um cliente de partida, devolve o cliente mais perto do destino
+# Parametros: uma rota e um cliente de partida,
+# devolve o cliente mais perto do destino
 def best_insertion(routes, client):
     vetor_dist = []
     closer = np.amax(dist_matrix)
@@ -274,4 +310,4 @@ if __name__ == '__main__':
     dist_matrix = gen_dist_matrix(qtd_customers, qtd_vehicles, customers)
 
     for i in range(params['geracoes']):
-        pop = evolve()  # fixme fazer função evolve 
+        pop = evolve()  # fixme fazer função evolve
