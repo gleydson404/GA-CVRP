@@ -81,6 +81,8 @@ def over_capacity_per_route(route, demands, capacity):
 # funcao, eu não modifiquei ela, só coloquei o alfa
 # como parametro por que eu presciso usar ele em
 # outra funcao, e pra gente nao trabalhar com alfas diferente
+# @Gleydson404: Brigando pelo codigo, que feio!
+# Vi fundamentacao para a alteracao, nao se preocupe.
 def fitness_ind(individual, dist_matrix, gama):
     # gama = melhor / (((sum(dem/cap)*cap)/2)**2) * (geracao/num_geracoes)
     custo_total = np.sum(dist_veiculo(individual, dist_matrix))
@@ -274,6 +276,26 @@ def best_insertion(routes, client):
     return int(destino)
 
 
+# Acao: Calculo do Bounding Box por Rota
+# Recebe um individuo e retorna um vetor com os 4 pontos da sua caixa
+def bounding_box(individual):
+    coordenadas = []
+    rotas = get_routes_per_vehicle(individual)
+    # pontos dos clientes por rota
+    for veiculo in range(len(rotas)):
+        vetor_x = []
+        vetor_y = []
+        rota = rotas[veiculo]
+        rota.insert(0, 1)
+        for cliente in rota:
+            vetor_x.append(customers[int(cliente)][0])
+            vetor_y.append(customers[int(cliente)][1])
+        max_x, max_y = max(vetor_x), max(vetor_y)
+        min_x, min_y = min(vetor_x), min(vetor_y)
+        coordenadas.append([(max_x, max_y), (max_x, min_y), (min_x, min_y), (min_x, max_y)])
+    return coordenadas
+
+
 def evolve():
     pass
 
@@ -311,3 +333,4 @@ if __name__ == '__main__':
 
     for i in range(params['geracoes']):
         pop = evolve()  # fixme fazer função evolve
+
