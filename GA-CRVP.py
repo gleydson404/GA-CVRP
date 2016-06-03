@@ -105,21 +105,22 @@ def get_routes_from_vehicle(individual):
     return routes
 
 # Acao: retorna um individuo a partir de suas rotas
-# FIX-ME estou com dificuldade para reorganizar o vetor: um individuo de 5
-# veiculos sempre tera no maximo 4 #, certo? Desta forma, as rotas vazias
-# ficam no final, nao to sabendo lidar nao sei se isso vai atrapalhar alguma
-# coisa... e nao sei se deixo com qtd_vehicles ou qtd_vehicles - 1 de #
+# Parametros: Recebe rotas e devolve individuo, preenchendo com # no final as rotas vazias
 def get_individual_from_vehicle(routes):
     qtd_veiculos_rota = len(routes)
     dif_veiculos =  qtd_vehicles - qtd_veiculos_rota - 1
-    individuo = []
+    individual = []
     for i in range(len(routes)):
-        individuo.extend(list(routes[i]))
-        individuo.extend('#')
+        individual.extend(list(routes[i]))
+        individual.extend('#')
+    if individual[len(individual)-1] == '#':
+        del individual[-1]
     while dif_veiculos > 0:
-        individuo.extend('#')
+        individual.extend('#')
         dif_veiculos = dif_veiculos - 1
-    return list(individuo)
+    if individual.count('#') < (qtd_vehicles-1):
+        individual.extend('#')
+    return list(individual)
 
 # Acao: calcula distancia da rota
 # Parametros: individuo e matriz de distancias
@@ -176,9 +177,8 @@ def uniform_cross(father, mother):
     pass
 
 # Acao: Mutacao Swap: troca genes entre 2 pontos (Tese de 2008)
-# Acho que seria mais facil usar a representação por rotas, mas precisariamos de uma
-# funcao que converta as rotas para individuo novamente, nao sei se compensa
-def mutacao_swap(individual):
+# Parametros: recebe e devolve o mesmo individuo
+def swap_mutation(individual):
     pontos = []
     while len(pontos) < 2:
         ponto = randint(0, len(individual)-1)
@@ -193,7 +193,7 @@ def mutacao_swap(individual):
 
 
 # Acao: "Mutacao" do tipo Reversa, tese de 2004 (pag 27)
-def mutacao_reversa(individual):
+def reverse_mutation(individual):
     rotas = get_routes_from_vehicle(individual)
     veiculo = randint(0, len(rotas)-1)
     rota = rotas[veiculo]
@@ -202,6 +202,40 @@ def mutacao_reversa(individual):
         rota_aux.extend(rota[len(rota)-1-cliente])
     rotas[veiculo] = rota_aux
     return get_individual_from_vehicle(rotas)
+
+
+# Acao: Mutacao Simples com PayOff de melhor insercao
+# tese de 2004 secao 4.3.1
+def simple_mutation(individual):
+    # sorteia um veiculo e um cliente e o deleta
+    rotas = get_routes_from_vehicle(individual)
+    veiculo = randint(0, len(rotas)-1)
+    cliente = choice(rotas[veiculo])
+    rotas[veiculo].remove(cliente)
+    # sorteia novamente um veiculo (rota) e procura pela menor distancia a
+    # partir do cliente escolhido anteriormente
+    veiculo = randint(0, len(rotas)-1)
+    posicao = best_insertion(rotas[veiculo], int(cliente))
+    rota = rotas[veiculo]
+    rota.insert(posicao, cliente)
+    rotas[veiculo] = rota
+    return get_individual_from_vehicle(rotas)
+
+
+
+# Acao: Dado um vetor de clientes (rota) e um cliente de partida
+# retorna o cliente de menor distancia ate ele
+# Parametros: uma rota e um cliente de partida, devolve o cliente mais perto do destino
+def best_insertion(routes, client):
+    vetor_dist = []
+    closer = np.amax(dist_matrix)
+    for index in range(len(routes)):
+        rota_index = int(routes[index])
+        vetor_dist.append(dist_matrix[client][rota_index])
+        if vetor_dist[index] < closer:
+            destino = index
+    return int(destino)
+
 
 def evolve():
     pass
@@ -240,10 +274,3 @@ if __name__ == '__main__':
 
     for i in range(params['geracoes']):
         pop = evolve()  # fixme fazer função evolve 
-
-individual = ['5','4','#','3','8','1','9','#','#','#','2','6','7']
-print "individuo: ", individual
-print "individuo: ", (mutacao_swap(individual))
-teste = (get_routes_from_vehicle(individual))
-print "individuo: ", (get_individual_from_vehicle(teste))
-print "individuo: ", mutacao_reversa(individual)
