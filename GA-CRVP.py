@@ -63,6 +63,7 @@ def over_capacity(individual, demands, capacity):
 # parametros: individuo, matriz de distancias
 def fitness_ind(individual, dist_matrix):
     gama = 1
+    # gama = melhor / (((sum(dem/cap)*cap)/2)**2) * (geracao/num_geracoes)
     custo_total = np.sum(dist_veiculo(individual, dist_matrix))
     estouro_total = np.sum(over_capacity(individual))
     fitness = custo_total + gama * estouro_total
@@ -150,8 +151,8 @@ def dist_veiculo(ind, dist_matrix, qtd_customers, qtd_vehicles):
         i = i + 1
     return vetor_dist
 
-# =-=-=-=-=-=-=-=-=-=-=- OPERADORES =-=-=-=-=-=-=-=-=-=-=-=-=- #
 
+# =-=-=-=-=-=-=-=-=-=-=- OPERADORES =-=-=-=-=-=-=-=-=-=-=-=-=- #
 
 def simple_one_poins_cross(father, mother):
     pass
