@@ -83,20 +83,21 @@ def over_capacity_per_route(route, demands, capacity):
 # outra funcao, e pra gente nao trabalhar com alfas diferente
 # @Gleydson404: Brigando pelo codigo, que feio!
 # Vi fundamentacao para a alteracao, nao se preocupe.
-def fitness_ind(individual, dist_matrix, gama):
+def fitness_ind(individual, dist_matrix, qtd_customers, qtd_vehicles, demands, capacity,  gama):
     # gama = melhor / (((sum(dem/cap)*cap)/2)**2) * (geracao/num_geracoes)
-    custo_total = np.sum(dist_veiculo(individual, dist_matrix))
-    estouro_total = np.sum(over_capacity(individual))
+    custo_total = np.sum(dist_veiculo(individual, dist_matrix, qtd_customers, qtd_vehicles))
+    estouro_total = np.sum(over_capacity(individual, demands, capacity))
     fitness = custo_total + gama * estouro_total
     return fitness
 
 
 # Acao: Calcula o fitness da Populacao
 # Parametros: populacao
-def fitness_pop(populacao, dist_matrix, gama):
+def fitness_pop(populacao, dist_matrix, qtd_customers, qtd_vehicles, demands, capacity, gama):
     fit_pop = []
     for ind in populacao:
-        fit_pop.append((fitness_ind(ind, dist_matrix, gama), ind))
+        fit_pop.append((fitness_ind(ind, dist_matrix, qtd_customers, qtd_vehicles, demands,
+            capacity, gama), ind))
     return fit_pop
 
 
@@ -124,7 +125,7 @@ def get_routes_per_vehicle(individual):
             if elesments:
                 routes.append(elesments[:])
                 elesments[:] = []
-    return routes
+    return list(routes)
 
 
 # Acao: retorna um individuo a partir de suas rotas
@@ -149,31 +150,45 @@ def get_individual_from_vehicle(routes):
 
 # Acao: calcula distancia da rota
 # Parametros: individuo e matriz de distancias
+# def dist_veiculo(ind, dist_matrix, qtd_customers, qtd_vehicles):
+#     i = 0
+#     vetor_dist = []
+#     for x in range(qtd_vehicles):
+#         dist = 0
+#         # Verifica estouro de index, o que acontece caso a ultima rota seja 0
+#         if x == (qtd_vehicles - 1) and i >= len(ind):
+#             vetor_dist.append(0)
+#             return vetor_dist
+#         # verifica o inicio de uma nova rota e calcula a distancia
+#         # do deposito ao primeiro cliente
+#         if (ind[i] != "#"):
+#             dist = dist + dist_matrix[0][int(ind[i])]
+#             i = i + 1
+#             # enquanto houver clientes nesta rota, a distancia
+#             # entre eles eh somada
+#             while (i < len(ind) and ind[i] != "#"):
+#                 dist = dist + dist_matrix[int(ind[i - 1])][int(ind[i])]
+#                 i = i + 1
+#             # verifica o termino de uma rota e calcula a distancia
+#             # entre o ultimo cliente e o deposito
+#         dist = dist + dist_matrix[int(ind[i - 1])][0]
+#         vetor_dist.append(dist)
+#         i = i + 1
+#     return vetor_dist
+
+
 def dist_veiculo(ind, dist_matrix, qtd_customers, qtd_vehicles):
-    i = 0
-    vetor_dist = []
-    for x in range(qtd_vehicles):
-        dist = 0
-        # Verifica estouro de index, o que acontece caso a ultima rota seja 0
-        if x == (qtd_vehicles - 1) and i >= len(ind):
-            vetor_dist.append(0)
-            return vetor_dist
-        # verifica o inicio de uma nova rota e calcula a distancia
-        # do deposito ao primeiro cliente
-        if (ind[i] != "#"):
-            dist = dist + dist_matrix[0][int(ind[i])]
-            i = i + 1
-            # enquanto houver clientes nesta rota, a distancia
-            # entre eles eh somada
-            while (i < len(ind) and ind[i] != "#"):
-                dist = dist + dist_matrix[int(ind[i - 1])][int(ind[i])]
-                i = i + 1
-            # verifica o termino de uma rota e calcula a distancia
-            # entre o ultimo cliente e o deposito
-        dist = dist + dist_matrix[int(ind[i - 1])][0]
-        vetor_dist.append(dist)
-        i = i + 1
-    return vetor_dist
+    costs = []
+    routes_ind = get_routes_per_vehicle(ind)
+    for item in routes_ind:
+        cost_route = dist_matrix[0][int(item[0])]
+        cost_route += dist_matrix[int(item[-1])][0]
+        for i in range(len(item) - 1):
+            cost_route += dist_matrix[int(i)][int(i + 1)]
+        costs.append(cost_route)
+    return costs
+
+
 
 
 # =-=-=-=-=-=-=-=-=-=-=- OPERADORES =-=-=-=-=-=-=-=-=-=-=-=-=- #
@@ -211,10 +226,13 @@ def calc_r(ind, dist_matrix, qtd_customers, qtd_vehicles, gama, demands, capacit
     return r_per_vehicle
 
 
-def uniform_cross(father, mother, dist_matrix, qtd_customers, qtd_vehicles, gama, demands, capacity):
+def uniform_cross(father, mother, dist_matrix, \
+        qtd_customers, qtd_vehicles, gama, demands, capacity):
     child = []
-    r_father = calc_r(father, dist_matrix, qtd_customers, qtd_vehicles, gama, demands, capacity)
-    r_mother = calc_r(mother, dist_matrix, qtd_customers, qtd_vehicles, gama,  demands, capacity)
+    r_father = calc_r(father, dist_matrix, qtd_customers,\
+            qtd_vehicles, gama, demands, capacity)
+    r_mother = calc_r(mother, dist_matrix, qtd_customers,\
+            qtd_vehicles, gama,  demands, capacity)
     routes_father = get_routes_per_vehicle(father)
     routes_mother = get_routes_per_vehicle(mother)
 
@@ -250,18 +268,18 @@ def uniform_cross(father, mother, dist_matrix, qtd_customers, qtd_vehicles, gama
 
 # Acao: Mutacao Swap: troca genes entre 2 pontos (Tese de 2008)
 # Parametros: recebe e devolve o mesmo individuo
-    def swap_mutation(individual):
-        pontos = []
-        while len(pontos) < 2:
+def swap_mutation(individual):
+    pontos = []
+    while len(pontos) < 2:
+        ponto = randint(0, len(individual)-1)
+        if (individual[ponto] == "#"):
             ponto = randint(0, len(individual)-1)
-            if (individual[ponto] == "#"):
-                ponto = randint(0, len(individual)-1)
-            if (individual[ponto] != "#"):
-                pontos.append(ponto)
-        aux = individual[pontos[0]]
-        individual[pontos[0]] = individual[pontos[1]]
-        individual[pontos[1]] = aux
-        return individual
+        if (individual[ponto] != "#"):
+            pontos.append(ponto)
+    aux = individual[pontos[0]]
+    individual[pontos[0]] = individual[pontos[1]]
+    individual[pontos[1]] = aux
+    return individual
 
 
 # Acao: "Mutacao" do tipo Reversa, tese de 2004 (pag 27)
@@ -329,8 +347,19 @@ def bounding_box(individual):
     return coordenadas
 
 
-def evolve():
-    pass
+def elitims(tx_elitims, pop):
+    qtd = int((tx_elitims * len(pop)) / 100)
+    # 0 no lamba por que o fitness, é o primeiro elemento de um item
+    # de pop
+    pop = sorted(pop, key=lambda x: x[0])
+
+    return pop[:qtd]
+
+
+def evolve(pop, params):
+    new_pop = []
+    while len(new_pop) < params['tamanho_pop']:
+        pass        
 
 
 # Acao: Roleta para minimizacao
