@@ -201,20 +201,41 @@ def horizontal_line_cross(father, mother):
 # Acao: calcula o R para o crossover uniform segundo a tese de 2004
 # retorna um vetor com os valores R por rota/veiculo
 # parametros assinatura da funcao é bastante clara
-def calc_r(ind, dist_matrix, qtd_customers, qtd_vehicles, gama):
+def calc_r(ind, dist_matrix, qtd_customers, qtd_vehicles, gama, demands, capacity):
     routes_cost = dist_veiculo(ind, dist_matrix, qtd_customers, qtd_vehicles)
     routes = get_routes_per_vehicle(ind)
     r_per_vehicle = []
-    for i in range(routes):
-        fit = routes_cost[i] + gama * over_capacity_per_route(routes[i])
+    for i in range(len(routes)):
+        fit = routes_cost[i] + gama * over_capacity_per_route(routes[i], routes[i], demands, capacity)
         r_per_vehicle.append(fit / qtd_customers)
     return r_per_vehicle
 
 
-def uniform_cross(father, mother):
-    pass
+def uniform_cross(father, mother, dist_matrix, qtd_customers, qtd_vehicles, gama, demands, capacity):
+    child = []
+    r_father = calc_r(father, dist_matrix, qtd_customers, qtd_vehicles, gama, demands, capacity)
+    r_mother = calc_r(mother, dist_matrix, qtd_customers, qtd_vehicles, gama,  demands, capacity)
+    clone_father = father[:]
+    clone_mother = mother[:]
+    
+    # adicionando rota de menor r ao filho
+    child.append(clone_father[clone_father.index(min(r_father))])
+    
+    # removendo rotas da mãe que tem algum elemento da rota colocada 
+    # no filho anteriormente
+    dele_cl_mother = []
+    for item in child:
+        for inner in item:
+            for inner_clone in clone_mother:
+                if inner in inner_clone:
+                    dele_cl_mother.append(clone_mother.index[inner_clone])                    
 
+    for item in dele_cl_mother:
+        clone_mother.remove(item)
 
+    print clone_mother
+
+                
 # Acao: Mutacao Swap: troca genes entre 2 pontos (Tese de 2008)
 # Parametros: recebe e devolve o mesmo individuo
 def swap_mutation(individual):
