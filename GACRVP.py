@@ -217,67 +217,51 @@ def uniform_cross(father, mother, dist_matrix, qtd_customers, qtd_vehicles, gama
     r_mother = calc_r(mother, dist_matrix, qtd_customers, qtd_vehicles, gama,  demands, capacity)
     routes_father = get_routes_per_vehicle(father)
     routes_mother = get_routes_per_vehicle(mother)
-    visiteds_routes_father = []
-    visiteds_routes_mather = []
-    print('father', father)
-    print('mother', mother)
-    print ('routes_father', routes_father)
-    print ('routes_mother', routes_mother)
 
-    # adicionando rota de menor r ao filho
-    selected_route = routes_father[r_father.index(min(r_father))]
-    
-    # removendo rotas da mãe que tem algum elemento da rota colocada 
-    # no filho anteriormente
-    dele_cl_mother = []
-    for item in selected_route:
-        print('item', item)
-        for inner in item:
-            print('inner', inner)
-            for index, inner_clone in enumerate(routes_mother):
-                print('inner_clone', inner_clone)
-                if inner in inner_clone:
-                    print ('aqui1')
-                    dele_cl_mother.append(index)                    
+    while (routes_father or routes_mother):
+        # adicionando a rota de menor r de p1 no filho
+        child.append(routes_father.pop(r_father.index(min(r_father))))
+        # removendo rotas da mãe que tem algum elemento da rota colocada
+        # no filho anteriormente
+        for item in child[-1]:
+            for inner in item:
+                for index, inner_route in enumerate(routes_mother):
+                    if inner in inner_route:
+                        del routes_mother[index]
 
-    print ('dele_cl_mother', dele_cl_mother)
-    for item in dele_cl_mother:
-        del routes_mother[item]
+        # adicionando a rota de menor r de p2 no filho
+        child.append(routes_mother.pop(r_mother.index(min(r_mother))))
+        # removendo as rotas do pai que tem cliente em conflito
+        # com a mae
+        for item in child:
+            for inner in item:
+                for index, inner_route in enumerate(routes_father):
+                    if inner in inner_route:
+                        del routes_father[index]
 
-    del dele_cl_mother[:]
-   
-    # removendo as rotas do pai que tem cliente em conflito 
-    # com a mae
-    dele_cl_father = []
-    selected_route = routes_mother[r_mother.index(min(r_mother))]
-    for item in selected_route:
-        for inner in item:
-            for index, inner_clone in enumerate(routes_father):
-                if inner in inner_clone:
-                    print ('aqui2')
-                    dele_cl_father.append(index)                    
-
-    print ('dele_cl_father', dele_cl_father)
-    for item in dele_cl_father:
-        del routes_father[item]
-
-    del dele_cl_father[:]
-    print (routes_father, routes_mother)
+    tmp_child= np.array(child)
+    tmp_child = np.hstack(tmp_child.flat)
+    lefting_customers = set(father) - set(tmp_child)
+    lefting_customers = list(lefting_customers)
+    lefting_customers.remove('#')
+    child.append(lefting_customers)
+    return child
+ 
 
 # Acao: Mutacao Swap: troca genes entre 2 pontos (Tese de 2008)
 # Parametros: recebe e devolve o mesmo individuo
-def swap_mutation(individual):
-    pontos = []
-    while len(pontos) < 2:
-        ponto = randint(0, len(individual)-1)
-        if (individual[ponto] == "#"):
+    def swap_mutation(individual):
+        pontos = []
+        while len(pontos) < 2:
             ponto = randint(0, len(individual)-1)
-        if (individual[ponto] != "#"):
-            pontos.append(ponto)
-    aux = individual[pontos[0]]
-    individual[pontos[0]] = individual[pontos[1]]
-    individual[pontos[1]] = aux
-    return individual
+            if (individual[ponto] == "#"):
+                ponto = randint(0, len(individual)-1)
+            if (individual[ponto] != "#"):
+                pontos.append(ponto)
+        aux = individual[pontos[0]]
+        individual[pontos[0]] = individual[pontos[1]]
+        individual[pontos[1]] = aux
+        return individual
 
 
 # Acao: "Mutacao" do tipo Reversa, tese de 2004 (pag 27)
