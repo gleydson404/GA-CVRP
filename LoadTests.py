@@ -37,7 +37,7 @@ def load(file):
         if 'NODE_COORD_SECTION ' in i:
             cord = True
     f.close()
-    return clients, int(qtd_clients), int(qtd_trucks), int(capacity)
+    return np.array(clients), int(qtd_clients), int(qtd_trucks), int(capacity)
 
 # costumer, x, y, z = load('tests/A-n10-k5.vrp')
 # print costumer
