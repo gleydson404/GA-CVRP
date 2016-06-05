@@ -30,4 +30,4 @@ for i, x in enumerate(tst):
 print(v)
 # print dist_veiculo(v, dist_matrix, qtd_customers, qtd_vehicles)
 print(fitness_ind(v, dist_matrix, 32,
-                  5 , customers[:, 3], capacity,  gama)) 
+                  5, customers[:, 3], capacity,  gama)) 

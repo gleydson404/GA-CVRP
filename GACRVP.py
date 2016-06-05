@@ -186,12 +186,10 @@ def dist_veiculo(ind, dist_matrix, qtd_customers, qtd_vehicles):
     routes_ind = get_routes_per_vehicle(ind)
     # print('individuo', ind)
     for item in routes_ind:
-        # print('dist_veiculo_item', item)
-        # print("dist 0 ate" + str(int(item[0]) - 1))
         cost_route = dist_matrix[0][int(item[0]) - 1]
         cost_route += dist_matrix[int(item[-1]) - 1][0]
         for i in range(len(item) - 1):
-            cost_route += dist_matrix[int(i)][int(i + 1)]
+            cost_route += dist_matrix[int(item[i]) - 1][int(item[i + 1]) - 1]
         # print('custo rota', item)
         # print('custo', cost_route)
         costs.append(cost_route)
