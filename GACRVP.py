@@ -56,7 +56,7 @@ def over_capacity(individual, demands, capacity):
         for inner in item:
             vehicle_demand += demands[int(inner)-1]
         if (capacity - vehicle_demand) < 0:
-            over += capacity - vehicle_demand
+            over += np.abs(apacity - vehicle_demand)
     return over
 
 
@@ -65,7 +65,7 @@ def over_capacity(individual, demands, capacity):
 def over_capacity_per_route(route, demands, capacity):
     dem = []
     for item in route:
-        dem.append(demands[int(item)])
+        dem.append(demands[int(item) - 1])
 
     total_demand = np.sum(dem)
     over = capacity - total_demand
@@ -184,15 +184,16 @@ def get_individual_from_vehicle(routes):
 def dist_veiculo(ind, dist_matrix, qtd_customers, qtd_vehicles):
     costs = []
     routes_ind = get_routes_per_vehicle(ind)
-    print('individuo', ind)
+    # print('individuo', ind)
     for item in routes_ind:
-        print('dist_veiculo_item', item)
-        print("dist 0 ate" + str(int(item[0]) - 1))
-        print(dist_matrix[0][int(item[0]) - 1])
+        # print('dist_veiculo_item', item)
+        # print("dist 0 ate" + str(int(item[0]) - 1))
         cost_route = dist_matrix[0][int(item[0]) - 1]
         cost_route += dist_matrix[int(item[-1]) - 1][0]
         for i in range(len(item) - 1):
             cost_route += dist_matrix[int(i)][int(i + 1)]
+        # print('custo rota', item)
+        # print('custo', cost_route)
         costs.append(cost_route)
     return costs
 
@@ -243,10 +244,29 @@ def uniform_cross(father, mother, dist_matrix,
                       qtd_vehicles, gama,  demands, capacity)
     routes_father = get_routes_per_vehicle(father)
     routes_mother = get_routes_per_vehicle(mother)
-
+    # print('paioriginal', father)
+    # print('maeoriginal', mother)
+    # print('rotaspai', routes_father)
+    # print('rotasmae', routes_mother)
+    # print('rfather', len(r_father))
+    # print('routesfather', len(routes_father))
+    # print('rfather', r_father)
+    
     while (routes_father or routes_mother):
         # adicionando a rota de menor r de p1 no filho
-        child.append(routes_father.pop(r_father.index(min(r_father))))
+        # print('aquiumavez')
+        # print('primeiromenopai',min(r_father))
+        # print('indiceprimeiromenorpai', r_father.index(min(r_father)))
+        # print('r_mother', r_mother)
+        # print('primeiromenomae',min(r_mother))
+        # print('indiceprimeiromenormae', r_mother.index(min(r_mother)))
+        #
+        # print('querotiraroindexpai', r_father.index(min(r_father)))
+        # print('r_father', r_father)
+        # print(routes_father[:])
+        if r_father:
+            child.append(routes_father.pop(r_father.index(min(r_father))))
+            del r_father[r_father.index(min(r_father))]
         # removendo rotas da mãe que tem algum elemento da rota colocada
         # no filho anteriormente
         for item in child[-1]:
@@ -254,9 +274,14 @@ def uniform_cross(father, mother, dist_matrix,
                 for index, inner_route in enumerate(routes_mother):
                     if inner in inner_route:
                         del routes_mother[index]
+                        del r_mother[index]
 
         # adicionando a rota de menor r de p2 no filho
-        child.append(routes_mother.pop(r_mother.index(min(r_mother))))
+        if r_mother:
+            # print('querotiraroindexmae', r_mother.index(min(r_mother)))
+            child.append(routes_mother.pop(r_mother.index(min(r_mother))))
+            del r_mother[r_mother.index(min(r_mother))]
+
         # removendo as rotas do pai que tem cliente em conflito
         # com a mae
         for item in child:
@@ -264,14 +289,15 @@ def uniform_cross(father, mother, dist_matrix,
                 for index, inner_route in enumerate(routes_father):
                     if inner in inner_route:
                         del routes_father[index]
-
+                        del r_father[index]
+                        
     tmp_child = np.array(child)
     tmp_child = np.hstack(tmp_child.flat)
     lefting_customers = set(father) - set(tmp_child)
     lefting_customers = list(lefting_customers)
     lefting_customers.remove('#')
     child.append(lefting_customers)
-    return child
+    return get_individual_from_vehicle(child)
 
 
 # Acao: Mutacao Swap: troca genes entre 2 pontos (Tese de 2008)
@@ -370,16 +396,18 @@ def evolve(pop, params, dist_matrix, qtd_customers,
     new_pop = []
     pop = fitness_pop(pop, dist_matrix, qtd_customers,
                       qtd_vehicles, demands, capacity, gama)
-    new_pop.extend(elitims(params['taxa_elitismo'], pop))
+    # new_pop.extend(elitims(params['taxa_elitismo'], pop))
+    # print('ramanhopop', params['tamanho_pop'])
     while len(new_pop) < params['tamanho_pop']:
         father = roleta(pop)
         mother = roleta(pop)
         child = uniform_cross(father, mother, dist_matrix, qtd_customers,
                               qtd_vehicles, gama, demands, capacity)
-        if params['taxa_mutacao'] > random():
-            child = simple_mutation(child)
+        # if params['taxa_mutacao'] > random():
+            # child = simple_mutation(child)
+        # print("evoluiu")
         new_pop.append(child)
-
+        # print('tamanho', len(new_pop))
     return new_pop
 
 
@@ -410,15 +438,17 @@ if __name__ == '__main__':
     # Lê arquivo de teste
     customers, qtd_customers, qtd_vehicles, capacity =\
             load('tests/A-n10-k5.vrp')
-    cstrs_list = customers.keys()[1: len(customers)]
+    cstrs_list = customers[:, 0]
     params = load_parameters("config.json")
     gama = 1
     pop = gen_pop(params['tamanho_pop'], qtd_vehicles,
                   qtd_customers, cstrs_list)
-    dist_matrix = gen_dist_matrix(qtd_customers, qtd_vehicles, customers)
+    dist_matrix = gen_dist_matrix(qtd_customers, customers)
     fit_history = []
 
     for i in range(params['geracoes']):
         pop = evolve(pop, params, dist_matrix, qtd_customers,
-                     qtd_vehicles, demands, capacity, gama)
-        fit_history.append(min(pop, key=lambda x: x[0]))    
+                qtd_vehicles, customers[:, 3], capacity, gama)
+        fit_history.append(min(pop, key=lambda x: x[0]))
+        # print("########### geracao", i)
+    print(pop[pop.index(fit_history[-1])])
