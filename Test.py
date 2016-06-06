@@ -17,22 +17,27 @@ gama = 1
 # print(uniform_cross(p1, p2, dist_matrix,
 #                     qtd_customers, qtd_vehicles, gama, customers[:, 3], capacity))
 
-# tst = ['21', '31', '19', '17', '13', '7', '26', '#', '12', '1', '16', '30', '#', '27', '24', '#',
-#         '29', '18', '8', '9', '22', '15', '10', '25', '5', '20', '#', '14', '28', '11', '4', '23',
-#         '3', '2', '6']
-# v = []
-# for i, x in enumerate(tst):
-#     if x != '#':
-#         v.append(str(int(x) + 1))
-#     else:
-#         v.append(x)
+tst = ['21', '31', '19', '17', '13', '7', '26', '#', '12', '1', '16', '30', '#', '27', '24', '#',
+        '29', '18', '8', '9', '22', '15', '10', '25', '5', '20', '#', '14', '28', '11', '4', '23',
+        '3', '2', '6']
+v = []
+for i, x in enumerate(tst):
+    if x != '#':
+        v.append(str(int(x) + 1))
+    else:
+        v.append(x)
 
-# print(v)
-# print dist_veiculo(v, dist_matrix, qtd_customers, qtd_vehicles)
-# print(fitness_ind(v, dist_matrix, 32,
-                  # 5, customers[:, 3], capacity,  gama)) 
+print(v)
+size = len(v)
+ind = get_routes_per_vehicle(v, size)
+print dist_veiculo(ind, dist_matrix, qtd_customers, qtd_vehicles, size)
+print(fitness_ind(v, dist_matrix, 32,
+                   5, customers[:, 3], capacity,  gama, size))
+
 p1 = ['4', '5', '7', '#', '10', '#', '#', '6', '#', '9', '1', '2', '8','3']
 p2 = ['9', '1', '7', '6', '#', '10', '2', '5', '#', '8', '4', '#', '3','#']
+
+
 
 # simple_random_cross(p1, p2, dist_matrix, qtd_vehicles)
 # simple_one_point_cross(p1, p2)

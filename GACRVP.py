@@ -76,12 +76,6 @@ def over_capacity_per_route(route, demands, capacity):
 
 # Acao: Calcula o fitness de um indivudo
 # parametros: individuo, matriz de distancias
-# fix-me @Donegas pra você não reclamar que eu mexi na sua
-# funcao, eu não modifiquei ela, só coloquei o alfa
-# como parametro por que eu presciso usar ele em
-# outra funcao, e pra gente nao trabalhar com alfas diferente
-# @Gleydson404: Brigando pelo codigo, que feio!
-# Vi fundamentacao para a alteracao, nao se preocupe.
 def fitness_ind(individual, dist_matrix, qtd_customers,
                 qtd_vehicles, demands, capacity,  gama, size_ind):
     # gama = melhor / (((sum(dem/cap)*cap)/2)**2) * (geracao/num_geracoes)
@@ -103,12 +97,19 @@ def fitness_pop(populacao, dist_matrix, qtd_customers,
 
 # Acao: Gerar a matriz de distancias para não precisar calcular a distancia
 # para um cliente todas as vezes
+def gen_dist_matrix_0(qtd_customers, customers):
+    dist_matrix = np.zeros((qtd_customers, qtd_customers))
+    coord = customers[:, 1:3]
+    for i in xrange(qtd_customers):
+        for j in xrange(qtd_customers):
+            dist_matrix[i][j] = (np.linalg.norm(coord[i] - coord[j]))/10
+    return dist_matrix
 def gen_dist_matrix(qtd_customers, customers):
     dist_matrix = np.zeros((qtd_customers + 1, qtd_customers + 1))
     coord = customers[:, 1:3]
     for i in xrange(qtd_customers):
         for j in xrange(qtd_customers):
-            dist_matrix[i + 1][j + 1] = (np.linalg.norm(coord[i] - coord[j]))/10
+            dist_matrix[i+1][j+1] = (np.linalg.norm(coord[i] - coord[j]))/10
     return dist_matrix
 
 
@@ -149,52 +150,38 @@ def get_individual_from_vehicle(routes, qtd_vehicles):
         individual.extend('#')
     return list(individual)
 
-
 # Acao: calcula distancia da rota
 # Parametros: individuo e matriz de distancias
-# def dist_veiculo(ind, dist_matrix, qtd_customers, qtd_vehicles):
-#     i = 0
-#     vetor_dist = []
-#     for x in range(qtd_vehicles):
-#         dist = 0
-#         # Verifica estouro de index, o que acontece caso a ultima rota seja 0
-#         if x == (qtd_vehicles - 1) and i >= len(ind):
-#             vetor_dist.append(0)
-#             return vetor_dist
-#         # verifica o inicio de uma nova rota e calcula a distancia
-#         # do deposito ao primeiro cliente
-#         if (ind[i] != "#"):
-#             dist = dist + dist_matrix[0][int(ind[i])]
-#             i = i + 1
-#             # enquanto houver clientes nesta rota, a distancia
-#             # entre eles eh somada
-#             while (i < len(ind) and ind[i] != "#"):
-#                 dist = dist + dist_matrix[int(ind[i - 1])][int(ind[i])]
-#                 i = i + 1
-#             # verifica o termino de uma rota e calcula a distancia
-#             # entre o ultimo cliente e o deposito
-#         dist = dist + dist_matrix[int(ind[i - 1])][0]
-#         vetor_dist.append(dist)
-#         i = i + 1
-#     return vetor_dist
-
-
-def dist_veiculo(routes_ind, dist_matrix, qtd_customers,
+def dist_veiculo_0(routes_ind, dist_matrix, qtd_customers,
                  qtd_vehicles, size_individual):
     costs = []
     # print(ind)
     # routes_ind = get_routes_per_vehicle(ind, size_individual)
     # print('individuo', ind)
     for item in routes_ind:
-        cost_route = dist_matrix[0][int(item[0])]
-        cost_route += dist_matrix[int(item[-1])][0]
-        for i in range(len(item)):
-            cost_route += dist_matrix[int(item[i]) - 1][int(item[i + 1])]
+        cost_route = dist_matrix[0][int(item[0]) - 1]  # dist_matrix[1][int(item)]
+        cost_route += dist_matrix[int(item[-1]) - 1][0]
+        for i in range(len(item) - 1):
+            cost_route += dist_matrix[int(item[i]) - 1][int(item[i + 1]) - 1]
         # print('custo rota', item)
         # print('custo', cost_route)
         costs.append(cost_route)
     return costs
-
+def dist_veiculo(routes_ind, dist_matrix, qtd_customers,
+                     qtd_vehicles, size_individual):
+    costs = []
+    # print(ind)
+    # routes_ind = get_routes_per_vehicle(ind, size_individual)
+    # print('individuo', ind)
+    for item in routes_ind:
+        cost_route = dist_matrix[1][int(item[0])]  # dist_matrix[1][int(item)]
+        cost_route += dist_matrix[int(item[-1])][1]
+        for i in range(len(item) - 1):
+            cost_route += dist_matrix[int(item[i])][int(item[i + 1])]
+        # print('custo rota', item)
+        # print('custo', cost_route)
+        costs.append(cost_route)
+    return costs
 
 # =-=-=-=-=-=-=-=-=-=-=- OPERADORES =-=-=-=-=-=-=-=-=-=-=-=-=- #
 
@@ -482,14 +469,6 @@ def main():
         # if i % 100 == 0:
             # print("########### geracao", i)
     # print(pop[pop.index(fit_history[-1])])
-
-    individuo = ['4', '9', '#','10','#','5','6','8','#','#']
-    size = len(individuo)
-    routes = get_routes_per_vehicle(individuo, size)
-    client = ['7','2','3']
-    print best_insertion(routes, client, dist_matrix)
-
-
 
 if __name__ == '__main__':
     main()
