@@ -48,8 +48,8 @@ def gen_pop(size, qtd_vcls, qtd_cstrs, cstrs_list):
 # Acao: Calcula a sobrecarga por veiculo e retorna a sobrecarga do individuo
 # Parametros: Individuo
 # fix-me usar a função que calcula overcapacity por rota dentro dessa
-def over_capacity(individual, demands, capacity):
-    routes = get_routes_per_vehicle(individual)
+def over_capacity(individual, demands, capacity, size_individual):
+    routes = get_routes_per_vehicle(individual, size_individual)
     over = 0
     for item in routes:
         vehicle_demand = 0
@@ -64,11 +64,9 @@ def over_capacity(individual, demands, capacity):
 # Acao: calcula o estou por rota
 # parametros: assinatura da funcao é clara
 def over_capacity_per_route(route, demands, capacity):
-    dem = []
-    for item in route:
-        dem.append(demands[int(item) - 1])
-
-    total_demand = np.sum(dem)
+    total_demand = 0
+    for i in route:
+        total_demand += demands[int(i) - 1]
     over = capacity - total_demand
     if over >= 0:
         return 0
@@ -85,25 +83,22 @@ def over_capacity_per_route(route, demands, capacity):
 # @Gleydson404: Brigando pelo codigo, que feio!
 # Vi fundamentacao para a alteracao, nao se preocupe.
 def fitness_ind(individual, dist_matrix, qtd_customers,
-                qtd_vehicles, demands, capacity,  gama):
+                qtd_vehicles, demands, capacity,  gama, size_ind):
     # gama = melhor / (((sum(dem/cap)*cap)/2)**2) * (geracao/num_geracoes)
-    custo_total = np.sum(dist_veiculo(individual, dist_matrix,
-                         qtd_customers, qtd_vehicles))
-    estouro_total = over_capacity(individual, demands, capacity)
+    routes_ind = get_routes_per_vehicle(individual, size_ind)
+    custo_total = np.sum(dist_veiculo(routes_ind, dist_matrix,
+                         qtd_customers, qtd_vehicles, size_ind))
+    estouro_total = over_capacity(individual, demands, capacity, size_ind)
     return custo_total + gama * estouro_total
 
 
 # Acao: Calcula o fitness da Populacao
 # Parametros: populacao
 def fitness_pop(populacao, dist_matrix, qtd_customers,
-                qtd_vehicles, demands, capacity, gama):
-    fit_pop = []
-    # for ind in populacao:
-        # print('aqui', ind)
-    [fit_pop.append(fitness_ind(ind, dist_matrix,
-                    qtd_customers, qtd_vehicles, demands,
-                    capacity, gama)) for ind in populacao]
-    return fit_pop
+                qtd_vehicles, demands, capacity, gama, size_ind):
+    return [fitness_ind(ind, dist_matrix,
+                        qtd_customers, qtd_vehicles, demands,
+                        capacity, gama, size_ind) for ind in populacao]
 
 
 # Acao: Gerar a matriz de distancias para não precisar calcular a distancia
@@ -119,13 +114,13 @@ def gen_dist_matrix(qtd_customers, customers):
 
 # Acao: retorna uma lista com as rotas de um veiculo
 # parametros:
-def get_routes_per_vehicle(individual):
+def get_routes_per_vehicle(individual, size_individual):
     individual = list(individual)
     individual.append('#')
     # np.append(individual, '#')
     routes = []
     elesments = []
-    for i in xrange(len(individual)):
+    for i in xrange(size_individual):
         if individual[i] != '#':
             elesments.append(individual[i])
         else:
@@ -142,7 +137,7 @@ def get_individual_from_vehicle(routes, qtd_vehicles):
     qtd_veiculos_rota = len(routes)
     dif_veiculos = qtd_vehicles - qtd_veiculos_rota - 1
     individual = []
-    for i in xrange(len(routes)):
+    for i in xrange(qtd_veiculos_rota):
         individual.extend(routes[i])
         individual.extend('#')
     if individual[-1] == '#':
@@ -154,20 +149,6 @@ def get_individual_from_vehicle(routes, qtd_vehicles):
         individual.extend('#')
     return list(individual)
 
-
-
-def mount_ind_from_routes(routes, qtd_vehicles):
-    ind = []
-    for item in routes:
-        ind.append([item, '#'])
-
-    qtd_separator = ind.count('#')
-    ind = np.array(ind)
-    ind = np.hstack(ind.flat)
-    missing_sep = (qtd_vehicles - 1) - qtd_separator
-    for _  in xrange(missing_sep):
-        np.append(ind, '#')
-    return ind
 
 # Acao: calcula distancia da rota
 # Parametros: individuo e matriz de distancias
@@ -198,10 +179,11 @@ def mount_ind_from_routes(routes, qtd_vehicles):
 #     return vetor_dist
 
 
-def dist_veiculo(ind, dist_matrix, qtd_customers, qtd_vehicles):
+def dist_veiculo(routes_ind, dist_matrix, qtd_customers,
+                 qtd_vehicles, size_individual):
     costs = []
     # print(ind)
-    routes_ind = get_routes_per_vehicle(ind)
+    # routes_ind = get_routes_per_vehicle(ind, size_individual)
     # print('individuo', ind)
     for item in routes_ind:
         cost_route = dist_matrix[0][int(item[0]) - 1]
@@ -239,12 +221,10 @@ def horizontal_line_cross(father, mother):
 # Acao: calcula o R para o crossover uniform segundo a tese de 2004
 # retorna um vetor com os valores R por rota/veiculo
 # parametros assinatura da funcao é bastante clara
-def calc_r(ind, dist_matrix, qtd_customers,
-           qtd_vehicles, gama, demands, capacity):
-    routes_cost = dist_veiculo(ind, dist_matrix, qtd_customers, qtd_vehicles)
-    routes = get_routes_per_vehicle(ind)
+def calc_r(routes, routes_cost, gama, demands, capacity, qtd_customers):
     r_per_vehicle = []
-    for i in range(len(routes)):
+    size_routes = len(routes)
+    for i in xrange(size_routes):
         fit = (routes_cost[i] + gama *
                over_capacity_per_route(routes[i], demands, capacity))
         r_per_vehicle.append(fit / qtd_customers)
@@ -252,44 +232,30 @@ def calc_r(ind, dist_matrix, qtd_customers,
 
 
 def uniform_cross(father, mother, dist_matrix,
-                  qtd_customers, qtd_vehicles, gama, demands, capacity):
+                  qtd_customers, qtd_vehicles, gama, demands,
+                  capacity, size_ind):
     child = []
-    r_father = calc_r(father, dist_matrix, qtd_customers,
-                      qtd_vehicles, gama, demands, capacity)
-    r_mother = calc_r(mother, dist_matrix, qtd_customers,
-                      qtd_vehicles, gama,  demands, capacity)
-    routes_father = get_routes_per_vehicle(father)
-    routes_mother = get_routes_per_vehicle(mother)
-    print('paioriginal', father)
-    print('maeoriginal', mother)
-    print('rotaspai', routes_father)
-    print('rotasmae', routes_mother)
-    print('rfather', len(r_father))
-    print('routesfather', len(routes_father))
-    print('rfather', r_father)
-    
+    routes_father = get_routes_per_vehicle(father, size_ind)
+    routes_mother = get_routes_per_vehicle(mother, size_ind)
+    route_cost_father = dist_veiculo(routes_father, dist_matrix,
+                                     qtd_customers, qtd_vehicles, size_ind)
+    route_cost_mother = dist_veiculo(routes_mother, dist_matrix,
+                                     qtd_customers, qtd_vehicles, size_ind)
+    r_father = calc_r(routes_father, route_cost_father,
+                      gama, demands, capacity, qtd_customers)
+    r_mother = calc_r(routes_mother, route_cost_mother,
+                      gama, demands, capacity, qtd_customers)
+
     while (routes_father or routes_mother):
         # adicionando a rota de menor r de p1 no filho
-        print('aquiumavez')
-        # print('primeiromenopai',min(r_father))
-        # print('indiceprimeiromenorpai', r_father.index(min(r_father)))
-        print('r_mother', r_mother)
-        # print('primeiromenomae',min(r_mother))
-        # print('indiceprimeiromenormae', r_mother.index(min(r_mother)))
-
-        # print('querotiraroindexpai', r_father.index(min(r_father)))
-        print('r_father', r_father)
-        print(routes_father[:])
         if r_father:
             child.append(routes_father.pop(r_father.index(min(r_father))))
             del r_father[r_father.index(min(r_father))]
             # removendo rotas da mãe que tem algum elemento da rota colocada
             # no filho anteriormente
-            print("adicionando do pai", child[-1])
             for item in child[-1]:
                 for index, inner_route in enumerate(routes_mother):
                     if item in inner_route:
-                        print(str(item)+'se repete em '+str(inner_route))
                         del routes_mother[index]
                         del r_mother[index]
 
@@ -301,14 +267,12 @@ def uniform_cross(father, mother, dist_matrix,
 
             # removendo as rotas do pai que tem cliente em conflito
             # com a mae
-            print("adicionando da mae", child[-1])
             for item in child[-1]:
                 for index, inner_route in enumerate(routes_father):
                     if item in inner_route:
-                        print(str(item)+'se repete em '+str(inner_route))
                         del routes_father[index]
                         del r_father[index]
-    print("child depois de add", child)                    
+    
     tmp_child = np.array(child)
     tmp_child = np.hstack(tmp_child.flat)
     lefting_customers = set(father) - set(tmp_child)
@@ -400,8 +364,8 @@ def bounding_box(individual):
     return coordenadas
 
 
-def elitims(tx_elitims, pop):
-    qtd = int((tx_elitims * len(pop)) / 100)
+def elitims(tx_elitims, pop, size_pop):
+    qtd = int((tx_elitims * size_pop) / 100)
     # 0 no lamba por que o fitness, é o primeiro elemento de um item
     # de pop
     pop = sorted(pop, key=lambda x: x[0])
@@ -410,10 +374,10 @@ def elitims(tx_elitims, pop):
 
 
 def evolve(pop, params, dist_matrix, qtd_customers,
-           qtd_vehicles, demands, capacity, gama):
-    new_pop = [] 
+           qtd_vehicles, demands, capacity, gama, size_ind):
+    new_pop = []
     fit_pop1 = fitness_pop(pop, dist_matrix, qtd_customers,
-                       qtd_vehicles, demands, capacity, gama)
+                           qtd_vehicles, demands, capacity, gama, size_ind)
     max_fitness = max(fit_pop1)
     min_fitness = min(fit_pop1)
     total_fitness = sum(fit_pop1)
@@ -421,19 +385,19 @@ def evolve(pop, params, dist_matrix, qtd_customers,
     # print('ramanhopop', params['tamanho_pop'])
     count = 0
     while count < 100:
-        index_p1 = roleta(pop, fit_pop1, max_fitness, min_fitness, total_fitness)
-        index_p2 = roleta(pop, fit_pop1, max_fitness, min_fitness, total_fitness)
+        index_p1 = roleta(pop, fit_pop1, max_fitness,
+                          min_fitness, total_fitness)
+        index_p2 = roleta(pop, fit_pop1, max_fitness,
+                          min_fitness, total_fitness)
         father = pop[index_p1]
         mother = pop[index_p2]
         child = uniform_cross(father, mother, dist_matrix, qtd_customers,
-                              qtd_vehicles, gama, demands, capacity)
+                              qtd_vehicles, gama, demands, capacity, size_ind)
         # if params['taxa_mutacao'] > random():
             # child = simple_mutation(child)
-        # new_pop.append(child)
-        print child
+        new_pop.append(child)
         count += 1
     return new_pop
-
 
 # Acao: Roleta para minimizacao
 # Parametro: Populacao
@@ -448,19 +412,21 @@ def roleta(populacao, fitness, max_fitness, min_fitness, fitness_total):
     range_fitness = max_fitness + min_fitness
     # Minimizacao = http://stackoverflow.com/questions/8760473/
     # roulette-wheel-selection-for-function-minimization
-    for index in xrange(len(populacao)):
+    size_pop = len(populacao)
+    for index in xrange(size_pop):
         # o range - o fitness do individuo eh subtraido do valor
         # aleatorio gerado ate que este seja < 0
         aleatorio -= (range_fitness - fitness[index])
         if aleatorio <= 0:
             return index
-    return len(populacao) - 1
+    return size_pop - 1
 
-if __name__ == '__main__':
+
+def main():
     # clientes com suas localidades vem do arquivo de teste
     # Lê arquivo de teste
     customers, qtd_customers, qtd_vehicles, capacity =\
-            load('tests/A-n10-k5.vrp')
+            load('tests/A-n32-k5.vrp')
     cstrs_list = customers[:, 0]
     params = load_parameters("config.json")
     gama = 1
@@ -470,10 +436,15 @@ if __name__ == '__main__':
     fit_history = []
     geracoes = params['geracoes']
     demands = customers[:, 3]
-    for i in xrange(10):
+    size_ind = len(pop[0])
+    for i in xrange(1000):
         pop = evolve(pop, params, dist_matrix, qtd_customers,
-                     qtd_vehicles, demands, capacity, gama)
+                     qtd_vehicles, demands, capacity, gama, size_ind)
         # fit_history.append(min(pop))
-        if i % 100 == 0:
-            print("########### geracao", i)
-    print(pop[pop.index(fit_history[-1])])
+        # if i % 100 == 0:
+            # print("########### geracao", i)
+    # print(pop[pop.index(fit_history[-1])])
+
+
+if __name__ == '__main__':
+    main()
