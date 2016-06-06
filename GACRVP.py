@@ -206,8 +206,21 @@ def simple_two_points_cross(father, mother):
     pass
 
 
-def simple_random_cross(father, mother):
-    pass
+def simple_random_cross(father, mother, dist_matrix, qtd_vehicles):
+    offspring = father
+    mother_subroutes = get_routes_per_vehicle(mother, len(mother))
+    subroute = mother_subroutes[randint(0, len(mother_subroutes)-1)]
+    for i in range(len(subroute)):
+        offspring.remove(subroute[i])
+    offspring_subroutes = get_routes_per_vehicle(offspring, len(offspring))
+    for i in range(len(subroute)):
+        sub_off_index = int(randint(0, len(offspring_subroutes)-1))
+        off_subroute = offspring_subroutes[sub_off_index]
+        offspring_subroutes.pop(sub_off_index)
+        best_ind = best_insertion(off_subroute, subroute[i], dist_matrix)
+        off_subroute.insert(best_ind, subroute[i])
+        offspring_subroutes.insert(sub_off_index, off_subroute)
+    return get_individual_from_vehicle(offspring_subroutes, qtd_vehicles)
 
 
 def biggest_overlap_cross(father, mother):
@@ -312,28 +325,29 @@ def reverse_mutation(individual):
 
 # Acao: Mutacao Simples com PayOff de melhor insercao
 # tese de 2004 secao 4.3.1
-def simple_mutation(individual):
+def simple_mutation(individual, dist_matrix, qtd_vehicles):
     # sorteia um veiculo e um cliente e o deleta
-    rotas = get_routes_per_vehicle(individual)
+    rotas = get_routes_per_vehicle(individual, len(individual))
     veiculo = randint(0, len(rotas)-1)
     cliente = choice(rotas[veiculo])
     rotas[veiculo].remove(cliente)
     # sorteia novamente um veiculo (rota) e procura pela menor distancia a
     # partir do cliente escolhido anteriormente
     veiculo = randint(0, len(rotas)-1)
-    posicao = best_insertion(rotas[veiculo], int(cliente))
+    posicao = best_insertion(rotas[veiculo], int(cliente), dist_matrix)
     rota = rotas[veiculo]
     rota.insert(posicao, cliente)
     rotas[veiculo] = rota
-    return get_individual_from_vehicle(rotas)
+    return get_individual_from_vehicle(rotas, qtd_vehicles)
 
 
 # Acao: Dado um vetor de clientes (rota) e um cliente de partida
 # retorna o cliente de menor distancia ate ele
 # Parametros: uma rota e um cliente de partida,
 # devolve o cliente mais perto do destino
-def best_insertion(routes, client):
+def best_insertion(routes, client, dist_matrix):
     vetor_dist = []
+    destino = 0
     closer = np.amax(dist_matrix)
     for index in xrange(len(routes)):
         rota_index = int(routes[index])

@@ -34,5 +34,6 @@ gama = 1
 p1 = ['4', '5', '7', '#', '10', '#', '#', '6', '#', '9', '1', '2', '8','3']
 p2 = ['9', '1', '7', '6', '#', '10', '2', '5', '#', '8', '4', '#', '3','#']
 
-print(uniform_cross(p1, p2, dist_matrix,
-                    qtd_customers, qtd_vehicles, gama, customers[:, 3], capacity))
+# simple_random_cross(p1, p2, dist_matrix, qtd_vehicles)
+# print(uniform_cross(p1, p2, dist_matrix,
+#                     qtd_customers, qtd_vehicles, gama, customers[:, 3], capacity))
