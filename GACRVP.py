@@ -104,11 +104,11 @@ def fitness_pop(populacao, dist_matrix, qtd_customers,
 # Acao: Gerar a matriz de distancias para não precisar calcular a distancia
 # para um cliente todas as vezes
 def gen_dist_matrix(qtd_customers, customers):
-    dist_matrix = np.zeros((qtd_customers, qtd_customers))
+    dist_matrix = np.zeros((qtd_customers + 1, qtd_customers + 1))
     coord = customers[:, 1:3]
     for i in xrange(qtd_customers):
         for j in xrange(qtd_customers):
-            dist_matrix[i][j] = (np.linalg.norm(coord[i] - coord[j]))/10
+            dist_matrix[i + 1][j + 1] = (np.linalg.norm(coord[i] - coord[j]))/10
     return dist_matrix
 
 
@@ -186,10 +186,10 @@ def dist_veiculo(routes_ind, dist_matrix, qtd_customers,
     # routes_ind = get_routes_per_vehicle(ind, size_individual)
     # print('individuo', ind)
     for item in routes_ind:
-        cost_route = dist_matrix[0][int(item[0]) - 1]
-        cost_route += dist_matrix[int(item[-1]) - 1][0]
-        for i in range(len(item) - 1):
-            cost_route += dist_matrix[int(item[i]) - 1][int(item[i + 1]) - 1]
+        cost_route = dist_matrix[0][int(item[0])]
+        cost_route += dist_matrix[int(item[-1])][0]
+        for i in range(len(item)):
+            cost_route += dist_matrix[int(item[i]) - 1][int(item[i + 1])]
         # print('custo rota', item)
         # print('custo', cost_route)
         costs.append(cost_route)
@@ -360,21 +360,30 @@ def simple_mutation(individual, dist_matrix, qtd_vehicles):
 # retorna o cliente de menor distancia ate ele
 # Parametros: uma rota e um cliente de partida,
 # devolve o cliente mais perto do destino
+# Teste Best Insertion com PayOff
 def best_insertion(routes, client, dist_matrix):
-    vetor_dist = []
-    destino = 0
-    closer = np.amax(dist_matrix)
-    for index in xrange(len(routes)):
-        rota_index = int(routes[index])
-        vetor_dist.append(dist_matrix[client][rota_index])
-        if vetor_dist[index] < closer:
-            destino = index
-    return int(destino)
-
+    destino = []
+    closer = (2*np.amax(dist_matrix)) * -1
+    k1 = int(client[0])
+    kn = int(client[len(client)-1])
+    for veiculo in range(len(routes)):
+        rotas = list(routes[veiculo])
+        rotas.insert(0, 1)
+        i = 0
+        while (i < len(rotas)-1):
+            cm = int(rotas[i])
+            cm1 = int(rotas[i+1])
+            payoff = dist_matrix[cm][cm1] - dist_matrix[cm][k1] - dist_matrix[kn][cm1]
+            # maior payoff
+            if payoff > closer:
+                closer = payoff
+                destino = veiculo, i
+            i = i + 1
+    return destino
 
 # Acao: Calculo do Bounding Box por Rota
 # Recebe um individuo e retorna um vetor com os 4 pontos da sua caixa
-def bounding_box(individual):
+def bounding_box(individual, customers):
     coordenadas = []
     rotas = get_routes_per_vehicle(individual)
     # pontos dos clientes por rota
@@ -466,14 +475,22 @@ def main():
     geracoes = params['geracoes']
     demands = customers[:, 3]
     size_ind = len(pop[0])
-    for i in xrange(1000):
-        pop = evolve(pop, params, dist_matrix, qtd_customers,
-                     qtd_vehicles, demands, capacity, gama, size_ind)
+    # for i in xrange(1000):
+        # pop = evolve(pop, params, dist_matrix, qtd_customers,
+                     # qtd_vehicles, demands, capacity, gama, size_ind)
         # fit_history.append(min(pop))
         # if i % 100 == 0:
             # print("########### geracao", i)
     # print(pop[pop.index(fit_history[-1])])
 
+    individuo = ['4', '9', '#','10','#','5','6','8','#','#']
+    size = len(individuo)
+    routes = get_routes_per_vehicle(individuo, size)
+    client = ['7','2','3']
+    print best_insertion(routes, client, dist_matrix)
+
+
 
 if __name__ == '__main__':
     main()
+
