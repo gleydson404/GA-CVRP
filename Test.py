@@ -38,6 +38,8 @@ p1 = ['4', '5', '7', '#', '10', '#', '#', '6', '#', '9', '1', '2', '8','3']
 p2 = ['9', '1', '7', '6', '#', '10', '2', '5', '#', '8', '4', '#', '3','#']
 
 
+print simple_mutation(v, dist_matrix, qtd_vehicles)
+
 
 # simple_random_cross(p1, p2, dist_matrix, qtd_vehicles)
 # simple_one_point_cross(p1, p2)

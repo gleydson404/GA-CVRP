@@ -338,7 +338,7 @@ def simple_mutation(individual, dist_matrix, qtd_vehicles):
     veiculo = randint(0, len(rotas)-1)
     posicao = best_insertion(rotas[veiculo], int(cliente), dist_matrix)
     rota = rotas[veiculo]
-    rota.insert(posicao, cliente)
+    rota.insert(posicao[1], cliente)
     rotas[veiculo] = rota
     return get_individual_from_vehicle(rotas, qtd_vehicles)
 
@@ -350,9 +350,10 @@ def simple_mutation(individual, dist_matrix, qtd_vehicles):
 # Teste Best Insertion com PayOff
 def best_insertion(routes, client, dist_matrix):
     destino = []
+    cliente = [client]
     closer = (2*np.amax(dist_matrix)) * -1
-    k1 = int(client[0])
-    kn = int(client[len(client)-1])
+    k1 = int(cliente[0])
+    kn = int(cliente[len(cliente)-1])
     for veiculo in range(len(routes)):
         rotas = list(routes[veiculo])
         rotas.insert(0, 1)
