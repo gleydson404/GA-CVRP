@@ -199,11 +199,26 @@ def dist_veiculo(routes_ind, dist_matrix, qtd_customers,
 # =-=-=-=-=-=-=-=-=-=-=- OPERADORES =-=-=-=-=-=-=-=-=-=-=-=-=- #
 
 def simple_one_point_cross(father, mother):
-    pass
+    point = randint(0, len(father)-1)
+    child_1 = father[0: point]
+    child_1.extend(mother[point: len(mother)])
+    child_2 = mother[0: point]
+    child_2.extend(father[point: len(father)])
+    return child_1, child_2
 
 
 def simple_two_points_cross(father, mother):
-    pass
+    point_1 = randint(1, len(father) - 1)
+    point_2 = randint(1, len(father) - 1)
+    f_slice = [father[0: point_1], father[point_1: point_2], father[point_2: len(father)]]
+    m_slice = [mother[0: point_1], mother[point_1: point_2], mother[point_2: len(mother)]]
+    child_1 = f_slice[0]
+    child_1.extend(m_slice[1])
+    child_1.extend(f_slice[2])
+    child_2 = m_slice[0]
+    child_2.extend(f_slice[1])
+    child_2.extend(m_slice[2])
+    return child_1, child_2
 
 
 def simple_random_cross(father, mother, dist_matrix, qtd_vehicles):
