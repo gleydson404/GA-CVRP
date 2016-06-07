@@ -2,7 +2,7 @@ from GACRVP import *
 import pprint
 import numpy as np
 from Distances import euclidian
-customers, qtd_customers, qtd_vehicles, capacity = load('tests/A-n10-k5.vrp')
+customers, qtd_customers, qtd_vehicles, capacity = load('tests/A-n32-k5.vrp')
 cstrs_list = customers[:, 0]
 params = load_parameters("config.json")
 pop = gen_pop(10, qtd_vehicles, qtd_customers, cstrs_list)
