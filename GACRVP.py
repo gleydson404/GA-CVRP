@@ -102,14 +102,17 @@ def gen_dist_matrix_0(qtd_customers, customers):
     coord = customers[:, 1:3]
     for i in xrange(qtd_customers):
         for j in xrange(qtd_customers):
-            dist_matrix[i][j] = (np.linalg.norm(coord[i] - coord[j]))/10
+            dist_matrix[i][j] = ec(coord[i], coord[j])
     return dist_matrix
 def gen_dist_matrix(qtd_customers, customers):
     dist_matrix = np.zeros((qtd_customers + 1, qtd_customers + 1))
     coord = customers[:, 1:3]
+    # coord.tolist()
+    print "coordenadas: ", coord
     for i in xrange(qtd_customers):
         for j in xrange(qtd_customers):
-            dist_matrix[i+1][j+1] = (np.linalg.norm(coord[i] - coord[j]))/10
+            dist_matrix[i+1][j+1] = ec(coord[i], coord[j])
+            print "Distancia de ", i+1, " a ", j+1, ": ", dist_matrix[i+1][j+1]
     return dist_matrix
 
 
@@ -121,7 +124,7 @@ def get_routes_per_vehicle(individual, size_individual):
     # np.append(individual, '#')
     routes = []
     elesments = []
-    for i in xrange(size_individual):
+    for i in xrange(size_individual + 1):
         if individual[i] != '#':
             elesments.append(individual[i])
         else:
@@ -178,8 +181,9 @@ def dist_veiculo(routes_ind, dist_matrix, qtd_customers,
         cost_route += dist_matrix[int(item[-1])][1]
         for i in range(len(item) - 1):
             cost_route += dist_matrix[int(item[i])][int(item[i + 1])]
-        # print('custo rota', item)
-        # print('custo', cost_route)
+            print 'Rota de ', item[i], ' a ', item[i+1], ': ', dist_matrix[int(item[i])][int(item[i + 1])]
+        print('custo rota', item)
+        print('custo', cost_route)
         costs.append(cost_route)
     return costs
 
@@ -388,6 +392,16 @@ def bounding_box(individual, customers):
         coordenadas.append([(max_x, max_y), (max_x, min_y),
                             (min_x, min_y), (min_x, max_y)])
     return coordenadas
+
+# (1) Check if the rects intersect. If so, the distance between them is 0.
+# (2) If not, think of r2 as the center of a telephone key pad, #5.
+# (3) r1 may be fully in one of the extreme quadrants (#1, #3, #7, or #9). If so
+#     the distance is the distance from one rect corner to another (e.g., if r1 is
+#     in quadrant #1, the distance is the distance from the lower-right corner of
+#     r1 to the upper-left corner of r2).
+# (4) Otherwise r1 is to the left, right, above, or below r2 and the distance is
+#     the distance between the relevant sides (e.g., if r1 is above, the distance
+#     is the distance between r1's low y and r2's high y).
 
 
 def elitims(tx_elitims, pop, size_pop):

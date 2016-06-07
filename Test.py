@@ -1,4 +1,5 @@
 from GACRVP import *
+import pprint
 import numpy as np
 from Distances import euclidian
 customers, qtd_customers, qtd_vehicles, capacity = load('tests/A-n32-k5.vrp')
@@ -7,7 +8,7 @@ params = load_parameters("config.json")
 pop = gen_pop(10, qtd_vehicles, qtd_customers, cstrs_list)
 dist_matrix = gen_dist_matrix(qtd_customers, customers)
 gama = 1
-# p1 = ['7', '6', '10', '1', '4', '#', '5', '#', '3', '8', '2', '#', '9', '#']
+# p1 = ['7', '6', '10', '1', '4', '#', '5', '#', '3', '8', '2o', '#', '9', '#']
 # p2 = ['9', '#', '6', '7', '5', '#', '10', '1', '#', '2', '8', '3', '4', '#']
 # p1 = ['6', '10', '3', '#', '7', '5', '4', '9', '#', '1', '#', '8', '2', '#']
 # p2 = ['5', '3', '10', '9', '2', '#', '8', '#', '6', '#', '7', '4', '#', '1']
@@ -17,9 +18,15 @@ gama = 1
 # print(uniform_cross(p1, p2, dist_matrix,
 #                     qtd_customers, qtd_vehicles, gama, customers[:, 3], capacity))
 
-tst = ['21', '31', '19', '17', '13', '7', '26', '#', '12', '1', '16', '30', '#', '27', '24', '#',
-        '29', '18', '8', '9', '22', '15', '10', '25', '5', '20', '#', '14', '28', '11', '4', '23',
-        '3', '2', '6']
+tst = ['21', '31', '19', '17', '13', '7', '26', '#',
+       '12', '1', '16', '30', '#',
+       '27', '24', '#',
+       '29', '18', '8', '9', '22', '15', '10', '25', '5', '20', '#',
+       '14', '28', '11', '4', '23', '3', '2', '6']
+
+# tst = ['15', '17', '9', '3', '16', '29', '#','12', '5', '26', '7', '8', '13', '32', '2', '#', '20', '4',
+#         '27', '25', '30', '10', '#', '23', '28', '18', '22', '#', '24', '6', '19', '14', '21', '1', '31', '11', '#']
+
 v = []
 for i, x in enumerate(tst):
     if x != '#':
@@ -29,7 +36,12 @@ for i, x in enumerate(tst):
 
 print(v)
 size = len(v)
+# pp = pprint.PrettyPrinter(indent=4)
+# for i in range(len(dist_matrix)):
+#     pp.pprint(dist_matrix[i])
+
 ind = get_routes_per_vehicle(v, size)
+print ind
 print dist_veiculo(ind, dist_matrix, qtd_customers, qtd_vehicles, size)
 print(fitness_ind(v, dist_matrix, 32,
                    5, customers[:, 3], capacity,  gama, size))
@@ -38,7 +50,7 @@ p1 = ['4', '5', '7', '#', '10', '#', '#', '6', '#', '9', '1', '2', '8','3']
 p2 = ['9', '1', '7', '6', '#', '10', '2', '5', '#', '8', '4', '#', '3','#']
 
 
-print simple_mutation(v, dist_matrix, qtd_vehicles)
+#print simple_mutation(v, dist_matrix, qtd_vehicles)
 
 
 # simple_random_cross(p1, p2, dist_matrix, qtd_vehicles)
