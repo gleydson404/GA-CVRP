@@ -2,7 +2,7 @@ from GACRVP import *
 import pprint
 import numpy as np
 from Distances import euclidian
-customers, qtd_customers, qtd_vehicles, capacity = load('tests/A-n32-k5.vrp')
+customers, qtd_customers, qtd_vehicles, capacity = load('tests/A-n10-k5.vrp')
 cstrs_list = customers[:, 0]
 params = load_parameters("config.json")
 pop = gen_pop(10, qtd_vehicles, qtd_customers, cstrs_list)
@@ -24,8 +24,11 @@ tst = ['21', '31', '19', '17', '13', '7', '26', '#',
        '29', '18', '8', '9', '22', '15', '10', '25', '5', '20', '#',
        '14', '28', '11', '4', '23', '3', '2', '6']
 
-# tst = ['15', '17', '9', '3', '16', '29', '#','12', '5', '26', '7', '8', '13', '32', '2', '#', '20', '4',
-#         '27', '25', '30', '10', '#', '23', '28', '18', '22', '#', '24', '6', '19', '14', '21', '1', '31', '11', '#']
+# tst = ['15', '17', '9', '3', '16', '29', '#',
+#        '12', '5', '26', '7', '8', '13', '32', '2', '#',
+#        '20', '4', '27', '25', '30', '10', '#',
+#        '23', '28', '18', '22', '#',
+#        '24', '6', '19', '14', '21', '1', '31', '11', '#']
 
 v = []
 for i, x in enumerate(tst):
@@ -50,7 +53,7 @@ p1 = ['4', '5', '7', '#', '10', '#', '#', '6', '#', '9', '1', '2', '8','3']
 p2 = ['9', '1', '7', '6', '#', '10', '2', '5', '#', '8', '4', '#', '3','#']
 
 
-#print simple_mutation(v, dist_matrix, qtd_vehicles)
+print simple_mutation(v, dist_matrix, qtd_vehicles)
 
 
 # simple_random_cross(p1, p2, dist_matrix, qtd_vehicles)
