@@ -97,22 +97,13 @@ def fitness_pop(populacao, dist_matrix, qtd_customers,
 
 # Acao: Gerar a matriz de distancias para não precisar calcular a distancia
 # para um cliente todas as vezes
-def gen_dist_matrix_0(qtd_customers, customers):
-    dist_matrix = np.zeros((qtd_customers, qtd_customers))
-    coord = customers[:, 1:3]
-    for i in xrange(qtd_customers):
-        for j in xrange(qtd_customers):
-            dist_matrix[i][j] = ec(coord[i], coord[j])
-    return dist_matrix
 def gen_dist_matrix(qtd_customers, customers):
     dist_matrix = np.zeros((qtd_customers + 1, qtd_customers + 1))
     coord = customers[:, 1:3]
-    # coord.tolist()
-    print "coordenadas: ", coord
     for i in xrange(qtd_customers):
         for j in xrange(qtd_customers):
             dist_matrix[i+1][j+1] = ec(coord[i], coord[j])
-            print "Distancia de ", i+1, " a ", j+1, ": ", dist_matrix[i+1][j+1]
+            # print "Distancia de ", i+1, " a ", j+1, ": ", dist_matrix[i+1][j+1]
     return dist_matrix
 
 
@@ -155,21 +146,6 @@ def get_individual_from_vehicle(routes, qtd_vehicles):
 
 # Acao: calcula distancia da rota
 # Parametros: individuo e matriz de distancias
-def dist_veiculo_0(routes_ind, dist_matrix, qtd_customers,
-                 qtd_vehicles, size_individual):
-    costs = []
-    # print(ind)
-    # routes_ind = get_routes_per_vehicle(ind, size_individual)
-    # print('individuo', ind)
-    for item in routes_ind:
-        cost_route = dist_matrix[0][int(item[0]) - 1]  # dist_matrix[1][int(item)]
-        cost_route += dist_matrix[int(item[-1]) - 1][0]
-        for i in range(len(item) - 1):
-            cost_route += dist_matrix[int(item[i]) - 1][int(item[i + 1]) - 1]
-        # print('custo rota', item)
-        # print('custo', cost_route)
-        costs.append(cost_route)
-    return costs
 def dist_veiculo(routes_ind, dist_matrix, qtd_customers,
                      qtd_vehicles, size_individual):
     costs = []
@@ -181,20 +157,22 @@ def dist_veiculo(routes_ind, dist_matrix, qtd_customers,
         cost_route += dist_matrix[int(item[-1])][1]
         for i in range(len(item) - 1):
             cost_route += dist_matrix[int(item[i])][int(item[i + 1])]
-            print 'Rota de ', item[i], ' a ', item[i+1], ': ', dist_matrix[int(item[i])][int(item[i + 1])]
-        print('custo rota', item)
-        print('custo', cost_route)
+            # print 'Rota de ', item[i], ' a ', item[i+1], ': ', dist_matrix[int(item[i])][int(item[i + 1])]
         costs.append(cost_route)
     return costs
 
 # =-=-=-=-=-=-=-=-=-=-=- OPERADORES =-=-=-=-=-=-=-=-=-=-=-=-=- #
 
-def simple_one_point_cross(father, mother):
+def simple_one_point_cross(father, mother, pop):
+    father = pop[father]
+    mother = pop[mother]
     point = randint(0, len(father)-1)
-    child_1 = father[0: point]
-    child_1.extend(mother[point: len(mother)])
-    child_2 = mother[0: point]
-    child_2.extend(father[point: len(father)])
+    child_1 = np.append(father[0: point], mother[point: len(mother)])
+    # child_1 = father[0: point]
+    # child_1.extend(mother[point: len(mother)])
+    child_2 = np.append(mother[0: point], father[point: len(mother)])
+    # child_2 = mother[0: point]
+    # child_2.extend(father[point: len(father)])
     return child_1, child_2
 
 
@@ -349,9 +327,8 @@ def simple_mutation(individual, dist_matrix, qtd_vehicles):
 
 # Acao: Dado um vetor de clientes (rota) e um cliente de partida
 # retorna o cliente de menor distancia ate ele
-# Parametros: uma rota e um cliente de partida,
-# devolve o cliente mais perto do destino
-# Teste Best Insertion com PayOff
+# Parametros: uma rota e um cliente de partida, devolve o cliente
+# mais perto do destino - Teste Best Insertion com PayOff 2004
 def best_insertion(routes, client, dist_matrix):
     destino = []
     cliente = [client]
@@ -393,15 +370,17 @@ def bounding_box(individual, customers):
                             (min_x, min_y), (min_x, max_y)])
     return coordenadas
 
-# (1) Check if the rects intersect. If so, the distance between them is 0.
-# (2) If not, think of r2 as the center of a telephone key pad, #5.
-# (3) r1 may be fully in one of the extreme quadrants (#1, #3, #7, or #9). If so
-#     the distance is the distance from one rect corner to another (e.g., if r1 is
-#     in quadrant #1, the distance is the distance from the lower-right corner of
-#     r1 to the upper-left corner of r2).
-# (4) Otherwise r1 is to the left, right, above, or below r2 and the distance is
-#     the distance between the relevant sides (e.g., if r1 is above, the distance
-#     is the distance between r1's low y and r2's high y).
+def biggest_overlap():
+    # (1) Check if the rects intersect. If so, the distance between them is 0.
+    # (2) If not, think of r2 as the center of a telephone key pad, #5.
+    # (3) r1 may be fully in one of the extreme quadrants (#1, #3, #7, or #9). If so
+    #     the distance is the distance from one rect corner to another (e.g., if r1 is
+    #     in quadrant #1, the distance is the distance from the lower-right corner of
+    #     r1 to the upper-left corner of r2).
+    # (4) Otherwise r1 is to the left, right, above, or below r2 and the distance is
+    #     the distance between the relevant sides (e.g., if r1 is above, the distance
+    #     is the distance between r1's low y and r2's high y).
+    pass
 
 
 def elitims(tx_elitims, pop, size_pop):
@@ -443,9 +422,6 @@ def evolve(pop, params, dist_matrix, qtd_customers,
 # Parametro: Populacao
 def roleta(populacao, fitness, max_fitness, min_fitness, fitness_total):
     # fitness = [individuo[0] for individuo in populacao]
-    # fitness_total = np.abs(np.sum(fitness))
-    # max_fitness = np.abs(np.max(fitness))
-    # min_fitness = np.abs(np.min(fitness))
     # gera um valor aleatorio dentro do range fitness total
     aleatorio = np.random.uniform(0, fitness_total)
     # range entre maior e menor para usar na roleta de minimizacao

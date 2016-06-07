@@ -1,8 +1,7 @@
 {
-	"tamanho_pop": 100,
+	"tamanho_pop": 50,
 	"geracoes": 500,
-	"veiculos": 10,
-	"capacidade_veiculo": 5,
+	"taxa_crossover": 0.8,
 	"taxa_mutacao": 0.3,
 	"taxa_elitismo": 0.5,
 	"tipo_crossover": 1,
