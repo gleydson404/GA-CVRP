@@ -163,48 +163,55 @@ def dist_veiculo(routes_ind, dist_matrix, qtd_customers,
 
 # =-=-=-=-=-=-=-=-=-=-=- OPERADORES =-=-=-=-=-=-=-=-=-=-=-=-=- #
 
-def simple_one_point_cross(father, mother, pop):
+
+def simple_one_point_cross(father, mother, pop, custumers):
     father = pop[father]
     mother = pop[mother]
     point = randint(0, len(father)-1)
     child_1 = np.append(father[0: point], mother[point: len(mother)])
-    # child_1 = father[0: point]
-    # child_1.extend(mother[point: len(mother)])
     child_2 = np.append(mother[0: point], father[point: len(mother)])
-    # child_2 = mother[0: point]
-    # child_2.extend(father[point: len(father)])
+    childs = cross_revisor(custumers, [child_1.tolist(), child_2.tolist()])
+    child_1 = childs[0]
+    child_2 = childs[1]
     return child_1, child_2
 
 
-def simple_two_points_cross(father, mother):
+def simple_two_points_cross(pop, father, mother, custumers):
+    father = pop[father]
+    mother = pop[mother]
     point_1 = randint(1, len(father) - 1)
     point_2 = randint(1, len(father) - 1)
-    f_slice = [father[0: point_1], father[point_1: point_2], father[point_2: len(father)]]
-    m_slice = [mother[0: point_1], mother[point_1: point_2], mother[point_2: len(mother)]]
-    child_1 = f_slice[0]
-    child_1.extend(m_slice[1])
-    child_1.extend(f_slice[2])
-    child_2 = m_slice[0]
-    child_2.extend(f_slice[1])
-    child_2.extend(m_slice[2])
+    child_1 = np.append(father[0: point_1], mother[point_1: point_2])
+    child_1 = np.append(child_1, father[point_2: len(father)])
+    child_2 = np.append(mother[0: point_1], father[point_1: point_2])
+    child_2 = np.append(child_2, mother[point_2: len(mother)])
+    childs = cross_revisor(custumers, [child_1.tolist(), child_2.tolist()])
+    child_1 = childs[0]
+    child_2 = childs[1]
     return child_1, child_2
 
 
-def simple_random_cross(father, mother, dist_matrix, qtd_vehicles):
-    offspring = father
+def simple_random_cross(pop, father, mother, dist_matrix, qtd_vehicles, custumers):
+    father = pop[father]
+    mother = pop[mother]
+    offspring = father.tolist()
     mother_subroutes = get_routes_per_vehicle(mother, len(mother))
     subroute = mother_subroutes[randint(0, len(mother_subroutes)-1)]
-    for i in range(len(subroute)):
-        offspring.remove(subroute[i])
-    offspring_subroutes = get_routes_per_vehicle(offspring, len(offspring))
-    for i in range(len(subroute)):
+    if len(mother_subroutes) > 1:
+        for i in range(len(subroute)):
+            offspring.remove(subroute[i])
+        offspring_subroutes = get_routes_per_vehicle(offspring, len(offspring))
         sub_off_index = int(randint(0, len(offspring_subroutes)-1))
         off_subroute = offspring_subroutes[sub_off_index]
         offspring_subroutes.pop(sub_off_index)
-        best_ind = best_insertion(off_subroute, subroute[i], dist_matrix)
-        off_subroute.insert(best_ind, subroute[i])
-        offspring_subroutes.insert(sub_off_index, off_subroute)
-    return get_individual_from_vehicle(offspring_subroutes, qtd_vehicles)
+        route, best_ind = best_insertion(off_subroute, subroute, dist_matrix)
+        off_subroute.insert(best_ind, subroute)
+        offspring_subroutes.insert(sub_off_index, np.hstack(off_subroute))
+        childs = cross_revisor(custumers, [get_individual_from_vehicle(offspring_subroutes, qtd_vehicles)])
+        child_1 = childs[0]
+        return np.array([child_1])
+    else:
+        return np.array([mother])
 
 
 def biggest_overlap_cross(father, mother):
@@ -290,6 +297,7 @@ def swap_mutation(individual):
         if (individual[ponto] != "#"):
             pontos.append(ponto)
     aux = individual[pontos[0]]
+    print 'individuo', individual
     individual[pontos[0]] = individual[pontos[1]]
     individual[pontos[1]] = aux
     return individual
@@ -318,7 +326,7 @@ def simple_mutation(individual, dist_matrix, qtd_vehicles):
     # sorteia novamente um veiculo (rota) e procura pela menor distancia a
     # partir do cliente escolhido anteriormente
     veiculo = randint(0, len(rotas)-1)
-    posicao = best_insertion(rotas[veiculo], int(cliente), dist_matrix)
+    posicao = best_insertion(rotas[veiculo], [int(cliente)], dist_matrix)
     rota = rotas[veiculo]
     rota.insert(posicao[1], cliente)
     rotas[veiculo] = rota
@@ -331,7 +339,8 @@ def simple_mutation(individual, dist_matrix, qtd_vehicles):
 # mais perto do destino - Teste Best Insertion com PayOff 2004
 def best_insertion(routes, client, dist_matrix):
     destino = []
-    cliente = [client]
+    # cliente = [client]
+    cliente = client
     closer = (2*np.amax(dist_matrix)) * -1
     k1 = int(cliente[0])
     kn = int(cliente[len(cliente)-1])
@@ -390,6 +399,34 @@ def elitims(tx_elitims, pop, size_pop):
     pop = sorted(pop, key=lambda x: x[0])
 
     return pop[:qtd]
+
+
+# Recebe o resultado de um crosssover e checa se eh factivel
+# Devolve uma rota corrigida
+def cross_revisor(custumers, childs):
+    for i in range(len(childs)):
+        offspring = childs[i]
+        repeated = np.zeros(len(custumers) + 1)
+        for x in offspring:
+            if x != '#':
+                repeated[int(x)] += 1
+        for x in range(len(repeated)):
+            if repeated[x] > 1:
+                offspring.remove(str(x))
+        for j in custumers:
+            if str(j) not in offspring:
+                offspring.insert(randint(0, len(offspring)-1), str(j))
+        trucks = [x for x in offspring if x == '#']
+        n_trucks = len(trucks)
+        while n_trucks < 4:
+            offspring.insert(randint(0, len(offspring)-1), '#')
+            n_trucks += 1
+        n_trucks = len(trucks)
+        while n_trucks > 4:
+            offspring.remove('#')
+            n_trucks -= 1
+        childs[i] = offspring
+    return childs
 
 
 def evolve(pop, params, dist_matrix, qtd_customers,

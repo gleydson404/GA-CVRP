@@ -38,23 +38,23 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
                     filhos.extend(simple_one_point_cross
                                   (roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness),
                                    roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness),
-                                   pop))
+                                   pop, cstrs_list))
 
             if params['tipo_crossover'] == 2:
                 if params['tipo_selecao'] == 1:  # adiciona no final do vetor os filhos retornados pelo crossover 2
                     filhos.extend(simple_two_points_cross
-                                  (roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness),
-                                   roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness)))
+                                  (pop, roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness),
+                                   roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness),cstrs_list))
 
             if params['tipo_crossover'] == 3:
-                if params['tipo_selecao'] == 1:  # adiciona no final do vetor os filhos retornados pelo crossover 2
+                if params['tipo_selecao'] == 1:  # adiciona no final do vetor os filhos retornados pelo crossover 3
                     filhos.extend(simple_random_cross
-                                  (roleta(fitness_populacao, max_fitness, min_fitness, total_fitness),
-                                   roleta(fitness_populacao, max_fitness, min_fitness, total_fitness),
-                                   dist_matrix, qtd_vehicles))
+                                  (pop, roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness),
+                                   roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness),
+                                   dist_matrix, qtd_vehicles, cstrs_list))
 
             if params['tipo_crossover'] == 4:
-                if params['tipo_selecao'] == 1:  # adiciona no final do vetor os filhos retornados pelo crossover 2
+                if params['tipo_selecao'] == 1:  # adiciona no final do vetor os filhos retornados pelo crossover 4
                     filhos.extend(uniform_cross
                                   (roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness),
                                    roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness),

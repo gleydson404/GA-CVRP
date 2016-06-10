@@ -4,7 +4,7 @@
 	"taxa_crossover": 0.8,
 	"taxa_mutacao": 0.3,
 	"taxa_elitismo": 0.5,
-	"tipo_crossover": 1,
+	"tipo_crossover": 3,
 	"tipo_mutacao": 1,
 	"tipo_selecao": 1,
 	"n_torneio": 5,
