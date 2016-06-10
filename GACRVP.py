@@ -380,6 +380,7 @@ def bounding_box(individual, customers):
     return coordenadas
 
 def biggest_overlap():
+
     # (1) Check if the rects intersect. If so, the distance between them is 0.
     # (2) If not, think of r2 as the center of a telephone key pad, #5.
     # (3) r1 may be fully in one of the extreme quadrants (#1, #3, #7, or #9). If so
@@ -458,13 +459,11 @@ def evolve(pop, params, dist_matrix, qtd_customers,
 # Acao: Roleta para minimizacao
 # Parametro: Populacao
 def roleta(populacao, fitness, max_fitness, min_fitness, fitness_total):
-    # fitness = [individuo[0] for individuo in populacao]
     # gera um valor aleatorio dentro do range fitness total
     aleatorio = np.random.uniform(0, fitness_total)
     # range entre maior e menor para usar na roleta de minimizacao
     range_fitness = max_fitness + min_fitness
     # Minimizacao = http://stackoverflow.com/questions/8760473/
-    # roulette-wheel-selection-for-function-minimization
     size_pop = len(populacao)
     for index in xrange(size_pop):
         # o range - o fitness do individuo eh subtraido do valor

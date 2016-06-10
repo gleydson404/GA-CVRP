@@ -95,4 +95,5 @@ geracao = 0
 while geracao < params['geracoes']:
     size = len(pop[0])
     pop = pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
+    # print stuffs
     geracao = geracao + 1
