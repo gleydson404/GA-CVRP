@@ -3,6 +3,9 @@ import pprint
 import numpy as np
 from Distances import euclidian
 from operator import itemgetter
+import datetime
+import time
+
 customers, qtd_customers, qtd_vehicles, capacity = load('tests/A-n32-k5.vrp')
 demands = customers[:, 3]
 cstrs_list = customers[:, 0]
@@ -20,15 +23,22 @@ pop = gen_pop(params['tamanho_pop'], qtd_vehicles, qtd_customers, cstrs_list)
 
 def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size):
     nova_populacao = []
+    minimo_fitness = []
     filhos = []
     fitness_populacao = sorted(fitness_pop(pop, dist_matrix, qtd_customers, qtd_vehicles,
                 demands, capacity, gama, size), reverse=False)
     max_fitness = max(fitness_populacao)
+    print "max fitness: ", max_fitness
     min_fitness = min(fitness_populacao)
+    minimo_fitness.append(min(fitness_populacao))
+    print "min fitness: ", fitness_populacao[0]
     total_fitness = sum(fitness_populacao)
 
     # Aplica elitismo: elitims(tx_elitims, pop, size_pop)
     elitismo = 0
+    elitismo = int(np.round(params["tamanho_pop"] * params["taxa_elitismo"]))
+    for item in range(elitismo):
+        nova_populacao.append(pop[item])
 
     while len(filhos) < (params['tamanho_pop'] - elitismo):
         prob_crossover = np.random.uniform(0, 1)
@@ -89,11 +99,37 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
     for i in range(len(pop)):
         print nova_populacao[i], fitness_populacao[i]
 
-    return nova_populacao
+    return nova_populacao, minimo_fitness
 
-geracao = 0
-while geracao < params['geracoes']:
-    size = len(pop[0])
-    pop = pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
-    # print stuffs
-    geracao = geracao + 1
+execucao = 0
+fitness_execucoes = []
+
+while execucao < params['execucao']:
+    pop = gen_pop(params['tamanho_pop'], qtd_vehicles, qtd_customers, cstrs_list)
+    date = datetime.datetime.fromtimestamp(time.time()).strftime('%d-%m-%Y-%H%M%S')
+    resultado = open("C:\Users\Thais\Documents\GitHub\GA-CVRP\GA-CVRP\Testes\GA_" + date + ".txt", "w")
+    print "execucao: ", execucao
+    resultado.write(str(execucao))
+    resultado.write("\n\n")
+    melhor_fit = []
+    print "parametros: ", params
+    resultado.write("\n\n")
+    resultado.write(str(params))
+
+    geracao = 0
+    while geracao < params['geracoes']:
+        size = len(pop[0])
+        print "geracao: ", geracao
+        resultado.write(str(geracao))
+        resultado.write("\n\n")
+        pop, melhor = pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
+        melhor_fit.append(melhor)
+        geracao = geracao + 1
+        resultado.write(str(melhor))
+        resultado.write("\n")
+    print "Fitness minimo ever: ", min(melhor_fit)
+    resultado.write(str(min(melhor_fit)))
+    fitness_execucoes.append(min(melhor_fit))
+    execucao = execucao + 1
+    resultado.close()
+print "Melhor fitness de ", params['execucao'], ": ", min(fitness_execucoes)

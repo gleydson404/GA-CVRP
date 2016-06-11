@@ -359,11 +359,14 @@ def best_insertion(routes, client, dist_matrix):
             i = i + 1
     return destino
 
+
+# =-=-=-=-=-=-=-=-=-=-=- BIGGEST OVERLAP CROSSOVER INI =-=-=-=-=-=-=-=-=-=-=-=- #
 # Acao: Calculo do Bounding Box por Rota
 # Recebe um individuo e retorna um vetor com os 4 pontos da sua caixa
 def bounding_box(individual, customers):
     coordenadas = []
-    rotas = get_routes_per_vehicle(individual)
+    size = len(individual)
+    rotas = get_routes_per_vehicle(individual, size)
     # pontos dos clientes por rota
     for veiculo in xrange(len(rotas)):
         vetor_x = []
@@ -371,26 +374,49 @@ def bounding_box(individual, customers):
         rota = rotas[veiculo]
         rota.insert(0, 1)
         for cliente in rota:
-            vetor_x.append(customers[int(cliente)][0])
-            vetor_y.append(customers[int(cliente)][1])
+            vetor_x.append(customers[int(cliente)-1][1])
+            vetor_y.append(customers[int(cliente)-1][2])
         max_x, max_y = max(vetor_x), max(vetor_y)
         min_x, min_y = min(vetor_x), min(vetor_y)
-        coordenadas.append([(max_x, max_y), (max_x, min_y),
-                            (min_x, min_y), (min_x, max_y)])
+        # coordenadas.append([(max_x, max_y), (max_x, min_y),
+                            # (min_x, min_y), (min_x, max_y)])
+        coordenadas.append([(min_x), (max_x), (min_y), (max_y)])
+    print coordenadas
     return coordenadas
+
+def intersect_area(individual, customers):
+    area = []
+    intersect = bounding_box(individual, customers)
+    for rota in range(len(intersect)):
+        for rota1 in range(len(intersect) - 1 - rota):
+            left = max(intersect[rota][0], intersect[rota+rota1+1][0])
+            right = min(intersect[rota][1], intersect[rota+rota1+1][1])
+            bottom = max(intersect[rota][2], intersect[rota+rota1+1][2])
+            top = min(intersect[rota][3], intersect[rota+rota1+1][3])
+            if left < right and bottom < top:
+                overlap = (int(right - left) * int(top - bottom))
+                area.append((overlap, rota, (rota+rota1+1)))
+            else:
+                area = distancia_centroides()
+    return area
+
+def distancia_centroides(individual, customers):
+    centroides = bounding_box(individual, customers)
+    dist_centroides = []
+    for rota in range(len(centroides)):
+        for rota1 in range(len(centroides) - 1 - rota):
+            dist = ec((((centroides[rota][1] + centroides[rota][0]) / 2), \
+                     ((centroides[rota][3] + centroides[rota][2]) / 2)),
+                     (((centroides[rota+rota1+1][1] + centroides[rota+rota1+1][0]) / 2), \
+                     ((centroides[rota+rota1+1][3] + centroides[rota+rota1+1][2]) / 2)))
+            dist_centroides.append((dist, rota, (rota+rota1+1)))
+    return dist_centroides
 
 def biggest_overlap():
 
-    # (1) Check if the rects intersect. If so, the distance between them is 0.
-    # (2) If not, think of r2 as the center of a telephone key pad, #5.
-    # (3) r1 may be fully in one of the extreme quadrants (#1, #3, #7, or #9). If so
-    #     the distance is the distance from one rect corner to another (e.g., if r1 is
-    #     in quadrant #1, the distance is the distance from the lower-right corner of
-    #     r1 to the upper-left corner of r2).
-    # (4) Otherwise r1 is to the left, right, above, or below r2 and the distance is
-    #     the distance between the relevant sides (e.g., if r1 is above, the distance
-    #     is the distance between r1's low y and r2's high y).
     pass
+
+# =-=-=-=-=-=-=-=-=-=-=- BIGGEST OVERLAP CROSSOVER FIM =-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 
 
 def elitims(tx_elitims, pop, size_pop):
