@@ -8,5 +8,6 @@
 	"tipo_mutacao": 1,
 	"tipo_selecao": 1,
 	"n_torneio": 5,
-	"troca_populacao": 1
+	"troca_populacao": 1,
+	"execucao": 5
 }
