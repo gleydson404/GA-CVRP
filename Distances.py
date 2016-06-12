@@ -6,5 +6,5 @@ import math as m
 def euclidian(a, b):
     a = [int(x) for x in a]
     b = [int(x) for x in b]
-
+    
     return float(m.sqrt(m.pow((a[0] - b[0]), 2) + m.pow(a[1] - b[1], 2)))

@@ -105,10 +105,11 @@ def fitness_pop(populacao, dist_matrix, qtd_customers,
 # para um cliente todas as vezes
 def gen_dist_matrix(qtd_customers, customers):
     dist_matrix = np.zeros((qtd_customers, qtd_customers))
-    coord = customers[:, 1:3]
+    coord = customers[:, 1:3]  # fix-me colocar isso como parametro
     for i in xrange(qtd_customers):
         for j in xrange(qtd_customers):
-            dist_matrix[i][j] = (np.linalg.norm(coord[i] - coord[j]))/10
+            # dist_matrix[i][j] = (np.linalg.norm(coord[i] - coord[j]))/10
+            dist_matrix[i][j] = ec(coord[i], [coord[j]]) 
     return dist_matrix
 
 
@@ -120,7 +121,7 @@ def get_routes_per_vehicle(individual, size_individual):
     # np.append(individual, '#')
     routes = []
     elesments = []
-    for i in xrange(size_individual):
+    for i in xrange(size_individual + 1):
         if individual[i] != '#':
             elesments.append(individual[i])
         else:
@@ -399,6 +400,7 @@ def evolve(pop, params, dist_matrix, qtd_customers,
         count += 1
     return new_pop
 
+
 # Acao: Roleta para minimizacao
 # Parametro: Populacao
 def roleta(populacao, fitness, max_fitness, min_fitness, fitness_total):
@@ -437,13 +439,14 @@ def main():
     geracoes = params['geracoes']
     demands = customers[:, 3]
     size_ind = len(pop[0])
-    for i in xrange(1000):
+    for i in xrange(geracoes):
         pop = evolve(pop, params, dist_matrix, qtd_customers,
                      qtd_vehicles, demands, capacity, gama, size_ind)
-        # fit_history.append(min(pop))
-        # if i % 100 == 0:
-            # print("########### geracao", i)
-    # print(pop[pop.index(fit_history[-1])])
+        fit_history.append(min(pop))
+        if i % 100 == 0:
+            print("########### geracao", i)
+    print('melhor', fit_history[-1])
+    print(pop[pop.index(fit_history[-1])])
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 {
 	"tamanho_pop": 100,
-	"geracoes": 500,
+	"geracoes": 1000,
 	"veiculos": 10,
 	"capacidade_veiculo": 5,
 	"taxa_mutacao": 0.3,
