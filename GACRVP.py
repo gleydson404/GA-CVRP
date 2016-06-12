@@ -76,12 +76,6 @@ def over_capacity_per_route(route, demands, capacity):
 
 # Acao: Calcula o fitness de um indivudo
 # parametros: individuo, matriz de distancias
-# fix-me @Donegas pra você não reclamar que eu mexi na sua
-# funcao, eu não modifiquei ela, só coloquei o alfa
-# como parametro por que eu presciso usar ele em
-# outra funcao, e pra gente nao trabalhar com alfas diferente
-# @Gleydson404: Brigando pelo codigo, que feio!
-# Vi fundamentacao para a alteracao, nao se preocupe.
 def fitness_ind(individual, dist_matrix, qtd_customers,
                 qtd_vehicles, demands, capacity,  gama, size_ind):
     # gama = melhor / (((sum(dem/cap)*cap)/2)**2) * (geracao/num_geracoes)
@@ -104,12 +98,12 @@ def fitness_pop(populacao, dist_matrix, qtd_customers,
 # Acao: Gerar a matriz de distancias para não precisar calcular a distancia
 # para um cliente todas as vezes
 def gen_dist_matrix(qtd_customers, customers):
-    dist_matrix = np.zeros((qtd_customers, qtd_customers))
-    coord = customers[:, 1:3]  # fix-me colocar isso como parametro
+    dist_matrix = np.zeros((qtd_customers + 1, qtd_customers + 1))
+    coord = customers[:, 1:3]
     for i in xrange(qtd_customers):
         for j in xrange(qtd_customers):
-            # dist_matrix[i][j] = (np.linalg.norm(coord[i] - coord[j]))/10
-            dist_matrix[i][j] = ec(coord[i], [coord[j]]) 
+            dist_matrix[i+1][j+1] = ec(coord[i], coord[j])
+            # print "Distancia de ", i+1, " a ", j+1, ": ", dist_matrix[i+1][j+1]
     return dist_matrix
 
 
@@ -150,65 +144,74 @@ def get_individual_from_vehicle(routes, qtd_vehicles):
         individual.extend('#')
     return list(individual)
 
-
 # Acao: calcula distancia da rota
 # Parametros: individuo e matriz de distancias
-# def dist_veiculo(ind, dist_matrix, qtd_customers, qtd_vehicles):
-#     i = 0
-#     vetor_dist = []
-#     for x in range(qtd_vehicles):
-#         dist = 0
-#         # Verifica estouro de index, o que acontece caso a ultima rota seja 0
-#         if x == (qtd_vehicles - 1) and i >= len(ind):
-#             vetor_dist.append(0)
-#             return vetor_dist
-#         # verifica o inicio de uma nova rota e calcula a distancia
-#         # do deposito ao primeiro cliente
-#         if (ind[i] != "#"):
-#             dist = dist + dist_matrix[0][int(ind[i])]
-#             i = i + 1
-#             # enquanto houver clientes nesta rota, a distancia
-#             # entre eles eh somada
-#             while (i < len(ind) and ind[i] != "#"):
-#                 dist = dist + dist_matrix[int(ind[i - 1])][int(ind[i])]
-#                 i = i + 1
-#             # verifica o termino de uma rota e calcula a distancia
-#             # entre o ultimo cliente e o deposito
-#         dist = dist + dist_matrix[int(ind[i - 1])][0]
-#         vetor_dist.append(dist)
-#         i = i + 1
-#     return vetor_dist
-
-
 def dist_veiculo(routes_ind, dist_matrix, qtd_customers,
-                 qtd_vehicles, size_individual):
+                     qtd_vehicles, size_individual):
     costs = []
     # print(ind)
     # routes_ind = get_routes_per_vehicle(ind, size_individual)
     # print('individuo', ind)
     for item in routes_ind:
-        cost_route = dist_matrix[0][int(item[0]) - 1]
-        cost_route += dist_matrix[int(item[-1]) - 1][0]
+        cost_route = dist_matrix[1][int(item[0])]  # dist_matrix[1][int(item)]
+        cost_route += dist_matrix[int(item[-1])][1]
         for i in range(len(item) - 1):
-            cost_route += dist_matrix[int(item[i]) - 1][int(item[i + 1]) - 1]
-        # print('custo rota', item)
-        # print('custo', cost_route)
+            cost_route += dist_matrix[int(item[i])][int(item[i + 1])]
+            # print 'Rota de ', item[i], ' a ', item[i+1], ': ', dist_matrix[int(item[i])][int(item[i + 1])]
         costs.append(cost_route)
     return costs
 
-
 # =-=-=-=-=-=-=-=-=-=-=- OPERADORES =-=-=-=-=-=-=-=-=-=-=-=-=- #
 
-def simple_one_point_cross(father, mother):
-    pass
+
+def simple_one_point_cross(father, mother, pop, custumers):
+    father = pop[father]
+    mother = pop[mother]
+    point = randint(0, len(father)-1)
+    child_1 = np.append(father[0: point], mother[point: len(mother)])
+    child_2 = np.append(mother[0: point], father[point: len(mother)])
+    childs = cross_revisor(custumers, [child_1.tolist(), child_2.tolist()])
+    child_1 = childs[0]
+    child_2 = childs[1]
+    return child_1, child_2
 
 
-def simple_two_points_cross(father, mother):
-    pass
+def simple_two_points_cross(pop, father, mother, custumers):
+    father = pop[father]
+    mother = pop[mother]
+    point_1 = randint(1, len(father) - 1)
+    point_2 = randint(1, len(father) - 1)
+    child_1 = np.append(father[0: point_1], mother[point_1: point_2])
+    child_1 = np.append(child_1, father[point_2: len(father)])
+    child_2 = np.append(mother[0: point_1], father[point_1: point_2])
+    child_2 = np.append(child_2, mother[point_2: len(mother)])
+    childs = cross_revisor(custumers, [child_1.tolist(), child_2.tolist()])
+    child_1 = childs[0]
+    child_2 = childs[1]
+    return child_1, child_2
 
 
-def simple_random_cross(father, mother):
-    pass
+def simple_random_cross(pop, father, mother, dist_matrix, qtd_vehicles, custumers):
+    father = pop[father]
+    mother = pop[mother]
+    offspring = father.tolist()
+    mother_subroutes = get_routes_per_vehicle(mother, len(mother))
+    subroute = mother_subroutes[randint(0, len(mother_subroutes)-1)]
+    if len(mother_subroutes) > 1:
+        for i in range(len(subroute)):
+            offspring.remove(subroute[i])
+        offspring_subroutes = get_routes_per_vehicle(offspring, len(offspring))
+        sub_off_index = int(randint(0, len(offspring_subroutes)-1))
+        off_subroute = offspring_subroutes[sub_off_index]
+        offspring_subroutes.pop(sub_off_index)
+        route, best_ind = best_insertion(off_subroute, subroute, dist_matrix)
+        off_subroute.insert(best_ind, subroute)
+        offspring_subroutes.insert(sub_off_index, np.hstack(off_subroute))
+        childs = cross_revisor(custumers, [get_individual_from_vehicle(offspring_subroutes, qtd_vehicles)])
+        child_1 = childs[0]
+        return np.array([child_1])
+    else:
+        return np.array([mother])
 
 
 def biggest_overlap_cross(father, mother):
@@ -294,6 +297,7 @@ def swap_mutation(individual):
         if (individual[ponto] != "#"):
             pontos.append(ponto)
     aux = individual[pontos[0]]
+    print 'individuo', individual
     individual[pontos[0]] = individual[pontos[1]]
     individual[pontos[1]] = aux
     return individual
@@ -313,42 +317,56 @@ def reverse_mutation(individual):
 
 # Acao: Mutacao Simples com PayOff de melhor insercao
 # tese de 2004 secao 4.3.1
-def simple_mutation(individual):
+def simple_mutation(individual, dist_matrix, qtd_vehicles):
     # sorteia um veiculo e um cliente e o deleta
-    rotas = get_routes_per_vehicle(individual)
+    rotas = get_routes_per_vehicle(individual, len(individual))
     veiculo = randint(0, len(rotas)-1)
     cliente = choice(rotas[veiculo])
     rotas[veiculo].remove(cliente)
     # sorteia novamente um veiculo (rota) e procura pela menor distancia a
     # partir do cliente escolhido anteriormente
     veiculo = randint(0, len(rotas)-1)
-    posicao = best_insertion(rotas[veiculo], int(cliente))
+    posicao = best_insertion(rotas[veiculo], [int(cliente)], dist_matrix)
     rota = rotas[veiculo]
-    rota.insert(posicao, cliente)
+    rota.insert(posicao[1], cliente)
     rotas[veiculo] = rota
-    return get_individual_from_vehicle(rotas)
+    return get_individual_from_vehicle(rotas, qtd_vehicles)
 
 
 # Acao: Dado um vetor de clientes (rota) e um cliente de partida
 # retorna o cliente de menor distancia ate ele
-# Parametros: uma rota e um cliente de partida,
-# devolve o cliente mais perto do destino
-def best_insertion(routes, client):
-    vetor_dist = []
-    closer = np.amax(dist_matrix)
-    for index in xrange(len(routes)):
-        rota_index = int(routes[index])
-        vetor_dist.append(dist_matrix[client][rota_index])
-        if vetor_dist[index] < closer:
-            destino = index
-    return int(destino)
+# Parametros: uma rota e um cliente de partida, devolve o cliente
+# mais perto do destino - Teste Best Insertion com PayOff 2004
+def best_insertion(routes, client, dist_matrix):
+    destino = []
+    # cliente = [client]
+    cliente = client
+    closer = (2*np.amax(dist_matrix)) * -1
+    k1 = int(cliente[0])
+    kn = int(cliente[len(cliente)-1])
+    for veiculo in range(len(routes)):
+        rotas = list(routes[veiculo])
+        rotas.insert(0, 1)
+        i = 0
+        while (i < len(rotas)-1):
+            cm = int(rotas[i])
+            cm1 = int(rotas[i+1])
+            payoff = dist_matrix[cm][cm1] - dist_matrix[cm][k1] - dist_matrix[kn][cm1]
+            # maior payoff
+            if payoff > closer:
+                closer = payoff
+                destino = veiculo, i
+            i = i + 1
+    return destino
 
 
+# =-=-=-=-=-=-=-=-=-=-=- BIGGEST OVERLAP CROSSOVER INI =-=-=-=-=-=-=-=-=-=-=-=- #
 # Acao: Calculo do Bounding Box por Rota
 # Recebe um individuo e retorna um vetor com os 4 pontos da sua caixa
-def bounding_box(individual):
+def bounding_box(individual, customers):
     coordenadas = []
-    rotas = get_routes_per_vehicle(individual)
+    size = len(individual)
+    rotas = get_routes_per_vehicle(individual, size)
     # pontos dos clientes por rota
     for veiculo in xrange(len(rotas)):
         vetor_x = []
@@ -356,13 +374,49 @@ def bounding_box(individual):
         rota = rotas[veiculo]
         rota.insert(0, 1)
         for cliente in rota:
-            vetor_x.append(customers[int(cliente)][0])
-            vetor_y.append(customers[int(cliente)][1])
+            vetor_x.append(customers[int(cliente)-1][1])
+            vetor_y.append(customers[int(cliente)-1][2])
         max_x, max_y = max(vetor_x), max(vetor_y)
         min_x, min_y = min(vetor_x), min(vetor_y)
-        coordenadas.append([(max_x, max_y), (max_x, min_y),
-                            (min_x, min_y), (min_x, max_y)])
+        # coordenadas.append([(max_x, max_y), (max_x, min_y),
+                            # (min_x, min_y), (min_x, max_y)])
+        coordenadas.append([(min_x), (max_x), (min_y), (max_y)])
+    print coordenadas
     return coordenadas
+
+def intersect_area(individual, customers):
+    area = []
+    intersect = bounding_box(individual, customers)
+    for rota in range(len(intersect)):
+        for rota1 in range(len(intersect) - 1 - rota):
+            left = max(intersect[rota][0], intersect[rota+rota1+1][0])
+            right = min(intersect[rota][1], intersect[rota+rota1+1][1])
+            bottom = max(intersect[rota][2], intersect[rota+rota1+1][2])
+            top = min(intersect[rota][3], intersect[rota+rota1+1][3])
+            if left < right and bottom < top:
+                overlap = (int(right - left) * int(top - bottom))
+                area.append((overlap, rota, (rota+rota1+1)))
+            else:
+                area = distancia_centroides()
+    return area
+
+def distancia_centroides(individual, customers):
+    centroides = bounding_box(individual, customers)
+    dist_centroides = []
+    for rota in range(len(centroides)):
+        for rota1 in range(len(centroides) - 1 - rota):
+            dist = ec((((centroides[rota][1] + centroides[rota][0]) / 2), \
+                     ((centroides[rota][3] + centroides[rota][2]) / 2)),
+                     (((centroides[rota+rota1+1][1] + centroides[rota+rota1+1][0]) / 2), \
+                     ((centroides[rota+rota1+1][3] + centroides[rota+rota1+1][2]) / 2)))
+            dist_centroides.append((dist, rota, (rota+rota1+1)))
+    return dist_centroides
+
+def biggest_overlap():
+
+    pass
+
+# =-=-=-=-=-=-=-=-=-=-=- BIGGEST OVERLAP CROSSOVER FIM =-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 
 
 def elitims(tx_elitims, pop, size_pop):
@@ -372,6 +426,34 @@ def elitims(tx_elitims, pop, size_pop):
     pop = sorted(pop, key=lambda x: x[0])
 
     return pop[:qtd]
+
+
+# Recebe o resultado de um crosssover e checa se eh factivel
+# Devolve uma rota corrigida
+def cross_revisor(custumers, childs):
+    for i in range(len(childs)):
+        offspring = childs[i]
+        repeated = np.zeros(len(custumers) + 1)
+        for x in offspring:
+            if x != '#':
+                repeated[int(x)] += 1
+        for x in range(len(repeated)):
+            if repeated[x] > 1:
+                offspring.remove(str(x))
+        for j in custumers:
+            if str(j) not in offspring:
+                offspring.insert(randint(0, len(offspring)-1), str(j))
+        trucks = [x for x in offspring if x == '#']
+        n_trucks = len(trucks)
+        while n_trucks < 4:
+            offspring.insert(randint(0, len(offspring)-1), '#')
+            n_trucks += 1
+        n_trucks = len(trucks)
+        while n_trucks > 4:
+            offspring.remove('#')
+            n_trucks -= 1
+        childs[i] = offspring
+    return childs
 
 
 def evolve(pop, params, dist_matrix, qtd_customers,
@@ -404,16 +486,11 @@ def evolve(pop, params, dist_matrix, qtd_customers,
 # Acao: Roleta para minimizacao
 # Parametro: Populacao
 def roleta(populacao, fitness, max_fitness, min_fitness, fitness_total):
-    # fitness = [individuo[0] for individuo in populacao]
-    # fitness_total = np.abs(np.sum(fitness))
-    # max_fitness = np.abs(np.max(fitness))
-    # min_fitness = np.abs(np.min(fitness))
     # gera um valor aleatorio dentro do range fitness total
     aleatorio = np.random.uniform(0, fitness_total)
     # range entre maior e menor para usar na roleta de minimizacao
     range_fitness = max_fitness + min_fitness
     # Minimizacao = http://stackoverflow.com/questions/8760473/
-    # roulette-wheel-selection-for-function-minimization
     size_pop = len(populacao)
     for index in xrange(size_pop):
         # o range - o fitness do individuo eh subtraido do valor
@@ -439,15 +516,14 @@ def main():
     geracoes = params['geracoes']
     demands = customers[:, 3]
     size_ind = len(pop[0])
-    for i in xrange(geracoes):
-        pop = evolve(pop, params, dist_matrix, qtd_customers,
-                     qtd_vehicles, demands, capacity, gama, size_ind)
-        fit_history.append(min(pop))
-        if i % 100 == 0:
-            print("########### geracao", i)
-    print('melhor', fit_history[-1])
-    print(pop[pop.index(fit_history[-1])])
-
+    # for i in xrange(1000):
+        # pop = evolve(pop, params, dist_matrix, qtd_customers,
+                     # qtd_vehicles, demands, capacity, gama, size_ind)
+        # fit_history.append(min(pop))
+        # if i % 100 == 0:
+            # print("########### geracao", i)
+    # print(pop[pop.index(fit_history[-1])])
 
 if __name__ == '__main__':
     main()
+
