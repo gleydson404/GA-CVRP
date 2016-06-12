@@ -20,7 +20,7 @@ from LoadTests import load
 from random import randint, choice, random
 import gc
 import json
-
+import pprint
 
 # Lendo arquivo de configuracao .json
 def load_parameters(file):
@@ -250,7 +250,10 @@ def uniform_cross(father, mother, dist_matrix,
     r_mother = calc_r(routes_mother, route_cost_mother,
                       gama, demands, capacity, qtd_customers)
 
-    while (routes_father or routes_mother):
+    while (routes_father or routes_mother) and (len(child) <= qtd_vehicles - 2):
+        # verificaçao no while por que podem ser 
+        # adicionados 2 pais a cada iteracao
+        # o que pode quebrar o algoritmo, colocando rotas a mais.
         # adicionando a rota de menor r de p1 no filho
         if r_father:
             child.append(routes_father.pop(r_father.index(min(r_father))))
@@ -277,13 +280,21 @@ def uniform_cross(father, mother, dist_matrix,
                         del routes_father[index]
                         del r_father[index]
     
-    tmp_child = np.array(child)
-    tmp_child = np.hstack(tmp_child.flat)
-    lefting_customers = set(father) - set(tmp_child)
+        # child[qtd_vehicles].extend(child[qtd_vehicles + 1])
+    tmp_child = child[:]
+    child = np.array(child)
+    child = np.hstack(child.flat)
+    lefting_customers = set(father) - set(child)
     lefting_customers = list(lefting_customers)
     lefting_customers.remove('#')
-    child.append(lefting_customers)
-    return get_individual_from_vehicle(child, qtd_vehicles)
+    if lefting_customers:
+        if qtd_vehicles == len(tmp_child):
+            route, position = best_insertion(tmp_child, lefting_customers, dist_matrix)
+            tmp_child[route].extend(lefting_customers)
+        else:
+            tmp_child.append(lefting_customers)
+
+    return get_individual_from_vehicle(tmp_child, qtd_vehicles)
 
 
 # Acao: Mutacao Swap: troca genes entre 2 pontos (Tese de 2008)
@@ -304,21 +315,23 @@ def swap_mutation(individual):
 
 
 # Acao: "Mutacao" do tipo Reversa, tese de 2004 (pag 27)
-def reverse_mutation(individual):
-    rotas = get_routes_per_vehicle(individual)
+def reverse_mutation(individual, size_ind, qtd_vehicles):
+    # fix-me passar len(individual) como parametro
+    rotas = get_routes_per_vehicle(individual, size_ind)
     veiculo = randint(0, len(rotas)-1)
     rota = rotas[veiculo]
     rota_aux = []
     for cliente in xrange(len(rota)):
         rota_aux.extend(rota[len(rota)-1-cliente])
     rotas[veiculo] = rota_aux
-    return get_individual_from_vehicle(rotas)
+    return get_individual_from_vehicle(rotas, qtd_vehicles)
 
 
 # Acao: Mutacao Simples com PayOff de melhor insercao
 # tese de 2004 secao 4.3.1
 def simple_mutation(individual, dist_matrix, qtd_vehicles):
     # sorteia um veiculo e um cliente e o deleta
+    #fix-me arrumar o len(individual), passa como parametro
     rotas = get_routes_per_vehicle(individual, len(individual))
     veiculo = randint(0, len(rotas)-1)
     cliente = choice(rotas[veiculo])
@@ -355,6 +368,7 @@ def best_insertion(routes, client, dist_matrix):
             # maior payoff
             if payoff > closer:
                 closer = payoff
+                # rota, posição na rota
                 destino = veiculo, i
             i = i + 1
     return destino
@@ -457,27 +471,28 @@ def cross_revisor(custumers, childs):
 
 
 def evolve(pop, params, dist_matrix, qtd_customers,
-           qtd_vehicles, demands, capacity, gama, size_ind):
+           qtd_vehicles, demands, capacity, gama, size_ind, fit_pop):
     new_pop = []
-    fit_pop1 = fitness_pop(pop, dist_matrix, qtd_customers,
-                           qtd_vehicles, demands, capacity, gama, size_ind)
-    max_fitness = max(fit_pop1)
-    min_fitness = min(fit_pop1)
-    total_fitness = sum(fit_pop1)
-    # new_pop.extend(elitims(params['taxa_elitismo'], pop))
+
+    max_fitness = max(fit_pop)
+    min_fitness = min(fit_pop)
+    total_fitness = sum(fit_pop)
+    new_pop.extend(elitims(params['taxa_elitismo'], pop, params["tamanho_pop"]))
     # print('ramanhopop', params['tamanho_pop'])
     count = 0
+    # fix-me colocar a quantidade de 
+    # individuos da populacao auqi
     while count < 100:
-        index_p1 = roleta(pop, fit_pop1, max_fitness,
+        index_p1 = roleta(pop, fit_pop, max_fitness,
                           min_fitness, total_fitness)
-        index_p2 = roleta(pop, fit_pop1, max_fitness,
+        index_p2 = roleta(pop, fit_pop, max_fitness,
                           min_fitness, total_fitness)
         father = pop[index_p1]
         mother = pop[index_p2]
         child = uniform_cross(father, mother, dist_matrix, qtd_customers,
                               qtd_vehicles, gama, demands, capacity, size_ind)
-        # if params['taxa_mutacao'] > random():
-            # child = simple_mutation(child)
+        if params['taxa_mutacao'] > random():
+            child = reverse_mutation(child, size_ind, qtd_vehicles)
         new_pop.append(child)
         count += 1
     return new_pop
@@ -516,13 +531,16 @@ def main():
     geracoes = params['geracoes']
     demands = customers[:, 3]
     size_ind = len(pop[0])
-    # for i in xrange(1000):
-        # pop = evolve(pop, params, dist_matrix, qtd_customers,
-                     # qtd_vehicles, demands, capacity, gama, size_ind)
-        # fit_history.append(min(pop))
-        # if i % 100 == 0:
-            # print("########### geracao", i)
-    # print(pop[pop.index(fit_history[-1])])
+    for i in xrange(geracoes):
+        fit_pop = fitness_pop(pop, dist_matrix, qtd_customers,
+                           qtd_vehicles, demands, capacity, gama, size_ind)
+
+        fit_history.append(min(fit_pop))
+        pop = evolve(pop, params, dist_matrix, qtd_customers,
+                     qtd_vehicles, demands, capacity, gama, size_ind, fit_pop)
+        if i % 100 == 0:
+            print("########### geracao", i)
+    print("melhor", min(fit_history[-1]))
 
 if __name__ == '__main__':
     main()

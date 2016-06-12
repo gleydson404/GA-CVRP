@@ -59,5 +59,7 @@ print simple_mutation(v, dist_matrix, qtd_vehicles)
 # print simple_random_cross(p1, p2, dist_matrix, qtd_vehicles)
 # simple_one_point_cross(p1, p2)
 # simple_two_points_cross(p1, p2)
-print(uniform_cross(p1, p2, dist_matrix,
-                    qtd_customers, qtd_vehicles, gama, customers[:, 3], capacity, 14))
+# print(uniform_cross(p1, p2, dist_matrix,
+#                     qtd_customers, qtd_vehicles, gama, customers[:, 3], capacity, 14))
+
+print best_insertion(ind[0], [9], dist_matrix)
