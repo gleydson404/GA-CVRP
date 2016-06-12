@@ -20,7 +20,6 @@ from LoadTests import load
 from random import randint, choice, random
 import gc
 import json
-import pprint
 
 # Lendo arquivo de configuracao .json
 def load_parameters(file):
@@ -283,7 +282,13 @@ def uniform_cross(father, mother, dist_matrix,
         # child[qtd_vehicles].extend(child[qtd_vehicles + 1])
     tmp_child = child[:]
     child = np.array(child)
-    child = np.hstack(child.flat)
+    try:
+        
+        child = np.hstack(child.flat)
+    except IndexError:
+        print("pai", father)
+        print("mae", mother)
+        print("child", child)
     lefting_customers = set(father) - set(child)
     lefting_customers = list(lefting_customers)
     lefting_customers.remove('#')
@@ -308,7 +313,7 @@ def swap_mutation(individual):
         if (individual[ponto] != "#"):
             pontos.append(ponto)
     aux = individual[pontos[0]]
-    print 'individuo', individual
+    # print 'individuo', individual
     individual[pontos[0]] = individual[pontos[1]]
     individual[pontos[1]] = aux
     return individual
@@ -335,13 +340,19 @@ def simple_mutation(individual, dist_matrix, qtd_vehicles):
     rotas = get_routes_per_vehicle(individual, len(individual))
     veiculo = randint(0, len(rotas)-1)
     cliente = choice(rotas[veiculo])
-    rotas[veiculo].remove(cliente)
+    # rotas[veiculo].remove(cliente)
+    # fix-me os erros nessa mutacao ocorrem por que voce
+    # remove um cara, não sei como isso afeta o desempenho,
+    # mas eu tirei. da uma olhada aqui
     # sorteia novamente um veiculo (rota) e procura pela menor distancia a
     # partir do cliente escolhido anteriormente
     veiculo = randint(0, len(rotas)-1)
     posicao = best_insertion(rotas[veiculo], [int(cliente)], dist_matrix)
     rota = rotas[veiculo]
-    rota.insert(posicao[1], cliente)
+    try:
+        rota.insert(posicao[1], cliente)
+    except IndexError:
+        rota.append(cliente)
     rotas[veiculo] = rota
     return get_individual_from_vehicle(rotas, qtd_vehicles)
 
@@ -369,7 +380,7 @@ def best_insertion(routes, client, dist_matrix):
             if payoff > closer:
                 closer = payoff
                 # rota, posição na rota
-                destino = veiculo, i
+                destino = (veiculo, i)
             i = i + 1
     return destino
 
@@ -471,7 +482,7 @@ def cross_revisor(custumers, childs):
 
 
 def evolve(pop, params, dist_matrix, qtd_customers,
-           qtd_vehicles, demands, capacity, gama, size_ind, fit_pop):
+           qtd_vehicles, demands, capacity, gama, size_ind, fit_pop, customers):
     new_pop = []
 
     max_fitness = max(fit_pop)
@@ -482,17 +493,16 @@ def evolve(pop, params, dist_matrix, qtd_customers,
     count = 0
     # fix-me colocar a quantidade de 
     # individuos da populacao auqi
-    while count < 100:
+    while count < params['tamanho_pop']:
         index_p1 = roleta(pop, fit_pop, max_fitness,
                           min_fitness, total_fitness)
         index_p2 = roleta(pop, fit_pop, max_fitness,
                           min_fitness, total_fitness)
         father = pop[index_p1]
         mother = pop[index_p2]
-        child = uniform_cross(father, mother, dist_matrix, qtd_customers,
-                              qtd_vehicles, gama, demands, capacity, size_ind)
+        child = simple_random_cross(pop, father, mother, dist_matrix, qtd_vehicles, customers) 
         if params['taxa_mutacao'] > random():
-            child = reverse_mutation(child, size_ind, qtd_vehicles)
+            child = swap_mutation(child)
         new_pop.append(child)
         count += 1
     return new_pop
@@ -537,10 +547,10 @@ def main():
 
         fit_history.append(min(fit_pop))
         pop = evolve(pop, params, dist_matrix, qtd_customers,
-                     qtd_vehicles, demands, capacity, gama, size_ind, fit_pop)
+                qtd_vehicles, demands, capacity, gama, size_ind, fit_pop, cstrs_list)
         if i % 100 == 0:
             print("########### geracao", i)
-    print("melhor", min(fit_history[-1]))
+    print("melhor", np.min(fit_history[-1]))
 
 if __name__ == '__main__':
     main()

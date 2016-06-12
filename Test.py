@@ -43,17 +43,17 @@ size = len(v)
 # for i in range(len(dist_matrix)):
 #     pp.pprint(dist_matrix[i])
 
-ind = get_routes_per_vehicle(v, size)
-print ind
-print dist_veiculo(ind, dist_matrix, qtd_customers, qtd_vehicles, size)
-print(fitness_ind(v, dist_matrix, 32,
-                   5, customers[:, 3], capacity,  gama, size))
-
-p1 = ['4', '5', '7', '#', '10', '#', '#', '6', '#', '9', '1', '2', '8','3']
-p2 = ['9', '1', '7', '6', '#', '10', '2', '5', '#', '8', '4', '#', '3','#']
-
-
-print simple_mutation(v, dist_matrix, qtd_vehicles)
+# ind = get_routes_per_vehicle(v, size)
+# print ind
+# print dist_veiculo(ind, dist_matrix, qtd_customers, qtd_vehicles, size)
+# print(fitness_ind(v, dist_matrix, 32,
+#                    5, customers[:, 3], capacity,  gama, size))
+#
+# p1 = ['4', '5', '7', '#', '10', '#', '#', '6', '#', '9', '1', '2', '8','3']
+# p2 = ['9', '1', '7', '6', '#', '10', '2', '5', '#', '8', '4', '#', '3','#']
+#
+#
+# print simple_mutation(v, dist_matrix, qtd_vehicles)
 
 
 # print simple_random_cross(p1, p2, dist_matrix, qtd_vehicles)
@@ -62,4 +62,7 @@ print simple_mutation(v, dist_matrix, qtd_vehicles)
 # print(uniform_cross(p1, p2, dist_matrix,
 #                     qtd_customers, qtd_vehicles, gama, customers[:, 3], capacity, 14))
 
-print best_insertion(ind[0], [9], dist_matrix)
+tbis = ['25', '16', '26', '2', '14', '20', '19', '24', '1', '#', '27', '#', '21', '22', '23', '28',
+        '29', '3', '5', '4', '7', '6', '9', '8', '11', '10', '13', '12', '15', '17', '32', '31',
+        '30', '18', '#', '#']
+print get_routes_per_vehicle(tbis, len(tbis))
