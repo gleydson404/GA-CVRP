@@ -193,7 +193,7 @@ def simple_two_points_cross(pop, father, mother, custumers):
 def simple_random_cross(pop, father, mother, dist_matrix, qtd_vehicles, custumers):
     father = pop[father]
     mother = pop[mother]
-    offspring = father.tolist()
+    offspring = list(father)
     mother_subroutes = get_routes_per_vehicle(mother, len(mother))
     subroute = mother_subroutes[randint(0, len(mother_subroutes)-1)]
     if len(mother_subroutes) > 1:
@@ -208,9 +208,9 @@ def simple_random_cross(pop, father, mother, dist_matrix, qtd_vehicles, custumer
         offspring_subroutes.insert(sub_off_index, np.hstack(off_subroute))
         childs = cross_revisor(custumers, [get_individual_from_vehicle(offspring_subroutes, qtd_vehicles)])
         child_1 = childs[0]
-        return np.array([child_1])
+        return np.array(child_1)
     else:
-        return np.array([mother])
+        return np.array(mother)
 
 
 def biggest_overlap_cross(father, mother):
@@ -238,6 +238,13 @@ def uniform_cross(father, mother, dist_matrix,
                   qtd_customers, qtd_vehicles, gama, demands,
                   capacity, size_ind):
     child = []
+    fitness_father = fitness_ind(father, dist_matrix, qtd_customers, qtd_vehicles, demands, capacity, gama, size_ind)
+    fitness_mother = fitness_ind(mother, dist_matrix, qtd_customers, qtd_vehicles, demands, capacity, gama, size_ind)
+    if fitness_father > fitness_mother:
+        temp = mother
+        mother = father
+        father = temp
+
     routes_father = get_routes_per_vehicle(father, size_ind)
     routes_mother = get_routes_per_vehicle(mother, size_ind)
     route_cost_father = dist_veiculo(routes_father, dist_matrix,
@@ -283,7 +290,6 @@ def uniform_cross(father, mother, dist_matrix,
     tmp_child = child[:]
     child = np.array(child)
     try:
-        
         child = np.hstack(child.flat)
     except IndexError:
         print("pai", father)
@@ -294,12 +300,15 @@ def uniform_cross(father, mother, dist_matrix,
     lefting_customers.remove('#')
     if lefting_customers:
         if qtd_vehicles == len(tmp_child):
-            route, position = best_insertion(tmp_child, lefting_customers, dist_matrix)
-            tmp_child[route].extend(lefting_customers)
+            for item in lefting_customers:
+                route, position = best_insertion(tmp_child, item, dist_matrix)
+                tmp_child[route].insert(position, item)
         else:
             tmp_child.append(lefting_customers)
-
     return get_individual_from_vehicle(tmp_child, qtd_vehicles)
+
+
+
 
 
 # Acao: Mutacao Swap: troca genes entre 2 pontos (Tese de 2008)
@@ -340,7 +349,7 @@ def simple_mutation(individual, dist_matrix, qtd_vehicles):
     rotas = get_routes_per_vehicle(individual, len(individual))
     veiculo = randint(0, len(rotas)-1)
     cliente = choice(rotas[veiculo])
-    # rotas[veiculo].remove(cliente)
+    rotas[veiculo].remove(cliente)
     # fix-me os erros nessa mutacao ocorrem por que voce
     # remove um cara, não sei como isso afeta o desempenho,
     # mas eu tirei. da uma olhada aqui
@@ -406,7 +415,6 @@ def bounding_box(individual, customers):
         # coordenadas.append([(max_x, max_y), (max_x, min_y),
                             # (min_x, min_y), (min_x, max_y)])
         coordenadas.append([(min_x), (max_x), (min_y), (max_y)])
-    print coordenadas
     return coordenadas
 
 def intersect_area(individual, customers):
@@ -443,14 +451,17 @@ def biggest_overlap():
 
 # =-=-=-=-=-=-=-=-=-=-=- BIGGEST OVERLAP CROSSOVER FIM =-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 
-
+# Tenho frescuras e preciso arrumar codigos feios FIX-ME
 def elitims(tx_elitims, pop, size_pop):
-    qtd = int((tx_elitims * size_pop) / 100)
+    qtd = int((tx_elitims * size_pop))
     # 0 no lamba por que o fitness, é o primeiro elemento de um item
     # de pop
-    pop = sorted(pop, key=lambda x: x[0])
-
-    return pop[:qtd]
+    pop = sorted(pop, key=lambda x: x[1])
+    return_pop =  pop[:qtd]
+    list_pop = []
+    for item in return_pop:
+        list_pop.append(item[0])
+    return list_pop
 
 
 # Recebe o resultado de um crosssover e checa se eh factivel
@@ -500,7 +511,7 @@ def evolve(pop, params, dist_matrix, qtd_customers,
                           min_fitness, total_fitness)
         father = pop[index_p1]
         mother = pop[index_p2]
-        child = simple_random_cross(pop, index_p1, index_p2, dist_matrix, qtd_vehicles, customers) 
+        child = simple_random_cross(pop, index_p1, index_p2, dist_matrix, qtd_vehicles, customers)
         if params['taxa_mutacao'] > random():
             child = simple_mutation(child, size_ind, qtd_vehicles)
         new_pop.append(child)
