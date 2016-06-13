@@ -25,13 +25,20 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
     nova_populacao = []
     minimo_fitness = []
     filhos = []
-    fitness_populacao = sorted(fitness_pop(pop, dist_matrix, qtd_customers, qtd_vehicles,
-                demands, capacity, gama, size), reverse=False)
+    pop_fitness = []
+    fitness_populacao = fitness_pop(pop, dist_matrix, qtd_customers, qtd_vehicles,
+                                    demands, capacity, gama, size)
+
+    for i, fitness in enumerate(fitness_populacao):
+        pop_fitness.append([pop[i], fitness])
+    nova_populacao.extend(elitims(params['taxa_elitismo'], pop_fitness, params['tamanho_pop']))
+
     max_fitness = max(fitness_populacao)
     print "max fitness: ", max_fitness
     min_fitness = min(fitness_populacao)
     minimo_fitness.append(min(fitness_populacao))
-    print "min fitness: ", fitness_populacao[0]
+    # so vai funcionar se houver elitismo
+    print "min fitness: ", pop_fitness[0][1]
     total_fitness = sum(fitness_populacao)
 
     # Aplica elitismo: elitims(tx_elitims, pop, size_pop)
@@ -58,22 +65,22 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
 
             if params['tipo_crossover'] == 3:
                 if params['tipo_selecao'] == 1:  # adiciona no final do vetor os filhos retornados pelo crossover 3
-                    filhos.extend(simple_random_cross
+                    filhos.append(simple_random_cross
                                   (pop, roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness),
                                    roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness),
                                    dist_matrix, qtd_vehicles, cstrs_list))
 
             if params['tipo_crossover'] == 4:
                 if params['tipo_selecao'] == 1:  # adiciona no final do vetor os filhos retornados pelo crossover 4
-                    filhos.extend(uniform_cross
-                                  (roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness),
-                                   roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness),
+                    filhos.append(uniform_cross
+                                  (pop[(roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness))],
+                                   pop[(roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness))],
                                    dist_matrix, qtd_customers, qtd_vehicles, gama, demands, capacity, size))
 
-    else:
-        if params['tipo_selecao'] == 1:
-            filhos.append(pop[roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness)])
-            filhos.append(pop[roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness)])
+        else:
+            if params['tipo_selecao'] == 1:
+                filhos.append(pop[roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness)])
+                filhos.append(pop[roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness)])
 
     # Mutacao
     for i, individuo in enumerate(filhos):
@@ -82,7 +89,7 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
             if params['tipo_mutacao'] == 1:
                 filhos[i] = swap_mutation(individuo)
             if params['tipo_mutacao'] == 2:
-                filhos[i] = reverse_mutation(individuo)
+                filhos[i] = reverse_mutation(individuo, size, qtd_vehicles)
             if params['tipo_mutacao'] == 3:
                 filhos[i] = simple_mutation(individuo, dist_matrix, qtd_vehicles)
 
@@ -95,9 +102,9 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
         novo_fitness = sorted(fitness_pop(pop, dist_matrix, qtd_customers, qtd_vehicles,
                 demands, capacity, gama, size), key=itemgetter(0), reverse=False)
         nova_populacao = [individuo[1] for individuo in novo_fitness[0:(params['tamanho_pop'])]]
-
-    for i in range(len(pop)):
-        print nova_populacao[i], fitness_populacao[i]
+    #
+    # for i in range(len(pop)):
+    #     print nova_populacao[i], fitness_populacao[i]
 
     return nova_populacao, minimo_fitness
 
