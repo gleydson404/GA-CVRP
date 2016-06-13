@@ -1,9 +1,9 @@
 {
-	"tamanho_pop": 100,
+	"tamanho_pop": 500,
 	"geracoes": 1000,
-	"taxa_crossover": 0.8,
-	"taxa_mutacao": 0.3,
-	"taxa_elitismo": 0.5,
+	"taxa_crossover": 1,
+	"taxa_mutacao": 1,
+	"taxa_elitismo": 0.3,
 	"tipo_crossover": 4,
 	"tipo_mutacao": 3,
 	"tipo_selecao": 1,

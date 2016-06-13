@@ -2,7 +2,7 @@ from GACRVP import *
 import pprint
 import numpy as np
 from Distances import euclidian
-customers, qtd_customers, qtd_vehicles, capacity = load('tests/A-n33-k5.vrp')
+customers, qtd_customers, qtd_vehicles, capacity = load('tests/A-n32-k5.vrp')
 cstrs_list = customers[:, 0]
 params = load_parameters("config.json")
 pop = gen_pop(10, qtd_vehicles, qtd_customers, cstrs_list)
@@ -24,21 +24,20 @@ tst = ['21', '31', '19', '17', '13', '7', '26', '#',
        '29', '18', '8', '9', '22', '15', '10', '25', '5', '20', '#',
        '14', '28', '11', '4', '23', '3', '2', '6']
 
-# tst = ['15', '17', '9', '3', '16', '29', '#',
-#        '12', '5', '26', '7', '8', '13', '32', '2', '#',
-#        '20', '4', '27', '25', '30', '10', '#',
-#        '23', '28', '18', '22', '#',
-#        '24', '6', '19', '14', '21', '1', '31', '11', '#']
+tst = ['13', '2', '17', '31', '#',
+       '27', '8', '14', '18', '20', '32', '22', '#',
+       '25', '15', '19', '9', '12', '5', '29', '24', '4', '3', '7', '#',
+       '21', '6', '26', '11', '16', '10', '23', '30', '28', '#']
 
-v = []
-for i, x in enumerate(tst):
-    if x != '#':
-        v.append(str(int(x) + 1))
-    else:
-        v.append(x)
+# v = []
+# for i, x in enumerate(tst):
+#     if x != '#':
+#         v.append(str(int(x) + 1))
+#     else:
+#         v.append(x)
 
-print(v)
-size = len(v)
+# print(v)
+# size = len(v)
 # pp = pprint.PrettyPrinter(indent=4)
 # for i in range(len(dist_matrix)):
 #     pp.pprint(dist_matrix[i])
@@ -46,8 +45,9 @@ size = len(v)
 # ind = get_routes_per_vehicle(v, size)
 # print ind
 # print dist_veiculo(ind, dist_matrix, qtd_customers, qtd_vehicles, size)
-# print(fitness_ind(v, dist_matrix, 32,
-#                    5, customers[:, 3], capacity,  gama, size))
+size = len(tst)
+print(fitness_ind(tst, dist_matrix, 32,
+                   5, customers[:, 3], capacity,  gama, size))
 #
 # p1 = ['4', '5', '7', '#', '10', '#', '#', '6', '#', '9', '1', '2', '8','3']
 # p2 = ['9', '1', '7', '6', '#', '10', '2', '5', '#', '8', '4', '#', '3','#']
@@ -65,4 +65,4 @@ size = len(v)
 tbis = ['25', '16', '26', '2', '14', '20', '19', '24', '1', '#', '27', '#', '21', '22', '23', '28',
         '29', '3', '5', '4', '7', '6', '9', '8', '11', '10', '13', '12', '15', '17', '32', '31',
         '30', '18', '#', '#']
-print get_routes_per_vehicle(tbis, len(tbis))
+#print get_routes_per_vehicle(tbis, len(tbis))
