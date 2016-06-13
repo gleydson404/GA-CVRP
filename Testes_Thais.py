@@ -28,10 +28,10 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
     fitness_populacao = sorted(fitness_pop(pop, dist_matrix, qtd_customers, qtd_vehicles,
                 demands, capacity, gama, size), reverse=False)
     max_fitness = max(fitness_populacao)
-    print "max fitness: ", max_fitness
+    # print "max fitness: ", max_fitness
     min_fitness = min(fitness_populacao)
     minimo_fitness.append(min(fitness_populacao))
-    print "min fitness: ", fitness_populacao[0]
+    # print "min fitness: ", fitness_populacao[0]
     total_fitness = sum(fitness_populacao)
 
     # Aplica elitismo: elitims(tx_elitims, pop, size_pop)
@@ -96,8 +96,8 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
                 demands, capacity, gama, size), key=itemgetter(0), reverse=False)
         nova_populacao = [individuo[1] for individuo in novo_fitness[0:(params['tamanho_pop'])]]
 
-    for i in range(len(pop)):
-        print nova_populacao[i], fitness_populacao[i]
+    # for i in range(len(pop)):
+        # print nova_populacao[i], fitness_populacao[i]
 
     return nova_populacao, minimo_fitness
 
@@ -107,7 +107,7 @@ fitness_execucoes = []
 while execucao < params['execucao']:
     pop = gen_pop(params['tamanho_pop'], qtd_vehicles, qtd_customers, cstrs_list)
     date = datetime.datetime.fromtimestamp(time.time()).strftime('%d-%m-%Y-%H%M%S')
-    resultado = open("C:\Users\Thais\Documents\GitHub\GA-CVRP\GA-CVRP\Testes\GA_" + date + ".txt", "w")
+    resultado = open("/home/gcs/Desktop/" + date + ".txt", "w")
     print "execucao: ", execucao
     resultado.write(str(execucao))
     resultado.write("\n\n")
@@ -119,7 +119,8 @@ while execucao < params['execucao']:
     geracao = 0
     while geracao < params['geracoes']:
         size = len(pop[0])
-        print "geracao: ", geracao
+        if geracao % 100 == 0:
+            print "geracao: ", geracao
         resultado.write(str(geracao))
         resultado.write("\n\n")
         pop, melhor = pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)

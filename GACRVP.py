@@ -380,7 +380,7 @@ def best_insertion(routes, client, dist_matrix):
             if payoff > closer:
                 closer = payoff
                 # rota, posição na rota
-                destino = (veiculo, i)
+                destino = veiculo, i
             i = i + 1
     return destino
 
@@ -500,9 +500,9 @@ def evolve(pop, params, dist_matrix, qtd_customers,
                           min_fitness, total_fitness)
         father = pop[index_p1]
         mother = pop[index_p2]
-        child = simple_random_cross(pop, father, mother, dist_matrix, qtd_vehicles, customers) 
+        child = simple_random_cross(pop, index_p1, index_p2, dist_matrix, qtd_vehicles, customers) 
         if params['taxa_mutacao'] > random():
-            child = swap_mutation(child)
+            child = simple_mutation(child, size_ind, qtd_vehicles)
         new_pop.append(child)
         count += 1
     return new_pop
