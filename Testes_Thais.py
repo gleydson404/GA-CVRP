@@ -130,9 +130,10 @@ while execucao < params['execucao']:
         resultado.write("\n")
     # melhor = sorted(melhor_fit, key=lambda x: x[0])
     # print "Fitness minimo ever: ", min(melhor_fit, key=lambda t: t[0])
-    print "Fitness minimo ever: ", min(melhor_fit, key=itemgetter(0))
-    resultado.write(str(min(melhor_fit)))
-    fitness_execucoes.append(min(melhor_fit))
+    min_melhor_fit = min(melhor_fit, key=itemgetter(0))
+    print "Fitness minimo ever: ", min_melhor_fit
+    resultado.write(str(min_melhor_fit))
+    fitness_execucoes.append(min_melhor_fit)
     execucao = execucao + 1
     resultado.close()
 print "Melhor fitness de ", params['execucao'], ": ", min(fitness_execucoes)

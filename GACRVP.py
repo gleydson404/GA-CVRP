@@ -336,7 +336,7 @@ def reverse_mutation(individual, size_ind, qtd_vehicles):
     rota = rotas[veiculo]
     rota_aux = []
     for cliente in xrange(len(rota)):
-        rota_aux.extend(rota[len(rota)-1-cliente])
+        rota_aux.append(rota[len(rota)-1-cliente])
     rotas[veiculo] = rota_aux
     return get_individual_from_vehicle(rotas, qtd_vehicles)
 
