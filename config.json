@@ -1,13 +1,13 @@
 {
 	"tamanho_pop": 100,
-	"geracoes": 500,
+	"geracoes": 5000,
 	"taxa_crossover": 1,
 	"taxa_mutacao": 1,
-	"taxa_elitismo": 0,
-	"tipo_crossover": 3,
+	"taxa_elitismo": 0.3,
+	"tipo_crossover": 4,
 	"tipo_mutacao": 3,
 	"tipo_selecao": 1,
 	"n_torneio": 5,
-	"troca_populacao": 2,
-	"execucao": 1
+	"troca_populacao": 1,
+	"execucao": 5
 }

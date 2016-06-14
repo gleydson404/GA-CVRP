@@ -14,64 +14,80 @@ params = load_parameters("config.json")
 dist_matrix = gen_dist_matrix(qtd_customers, customers)
 gama = 1
 
-pop = gen_pop(params['tamanho_pop'], qtd_vehicles, qtd_customers, cstrs_list)
+# pop = gen_pop(params['tamanho_pop'], qtd_vehicles, qtd_customers, cstrs_list)
 
 def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size):
-    nova_populacao = []
-    minimo_fitness = []
-    pop_plus_fit = []
-    filhos = []
-    pop_fitness = []
+    nova_populacao = [] # recebe elitismo
+    filhos = []         # recebe filhos dos crossovers que serao mutados
+    # minimo_fitness = [] # apenas para retorno, nao sera mais usado
+    pop_plus_fit = []   # Usado na troca da populacao por algum motivo que eu esqueci
+    pop_fitness = []    # Vetor de tuplas (individuo, fitness)
+
+    # calculo o fitness
     fitness_populacao = fitness_pop(pop, dist_matrix, qtd_customers, qtd_vehicles,
                                     demands, capacity, gama, size)
 
-    # Aplicacao do elitismo: Junta num vetor so e calcula o fitness
+    # Junta individuo (pop) e seu fitness (fitness populacao) em um so vetor
     for i, fitness in enumerate(fitness_populacao):
         pop_fitness.append([pop[i], fitness])
-    nova_populacao.extend(elitims(params['taxa_elitismo'], pop_fitness, params['tamanho_pop']))
 
-    max_fitness = max(fitness_populacao)
-    # print "max fitness: ", max_fitness
-    min_fitness = min(fitness_populacao)
-    minimo_fitness.append((min_fitness, pop[fitness_populacao.index(min_fitness)]))
-    # so vai funcionar se houver elitismo
-    print "min fitness: ", pop_fitness[0][1]
-    total_fitness = sum(fitness_populacao)
+    # ordena de acordo com o fitness
+    pop_fitness = sorted(pop_fitness, key=lambda x: x[1])
 
+    # Aplicacao do elitismo passando vetor de individuo e fitness ja ordenado
+    # Inclusive, poderia deixar de ser uma funcao, ja ta fazendo tudo aqui mesmo
+    if params['taxa_elitismo'] > 0:
+        nova_populacao.extend(elitims(params['taxa_elitismo'], pop_fitness, params['tamanho_pop']))
+
+    # Separa Individuo do fitness
+    pop = [individuo[0] for individuo in pop_fitness]
+    fitness = [individuo[1] for individuo in pop_fitness]
+
+    # Calculo do Max, Min e total do fitness para usar na roleta
+    max_fitness = max(fitness)
+    min_fitness = min(fitness)
+    total_fitness = sum(fitness)
+    print "Melhor Fitness: ", pop_fitness[0][1], "Individuo: ", pop_fitness[0][0]
+    print "Pior Fitness: ", pop_fitness[-1][1], "Individuo: ", pop_fitness[-1][0]
+
+    # Minimo_fitness servia apenas para retorno, o que acredito que nao sera mais necessario
+    # minimo_fitness.append((min_fitness, pop[fitness_populacao.index(min_fitness)]))
+
+    # gera quantos filhos forem necessarios ate que a populacao seja 100 (somado ao elitismo)
     while len(filhos) < (params['tamanho_pop'] - (params['taxa_elitismo'] * params['tamanho_pop'])):
         prob_crossover = np.random.uniform(0, 1)
         if prob_crossover <= params['taxa_crossover']:
             if params['tipo_crossover'] == 1:
                 if params['tipo_selecao'] == 1:  # adiciona no final do vetor os filhos retornados pelo crossover 1
                     filhos.extend(simple_one_point_cross
-                                  (roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness),
-                                   roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness),
+                                  (roleta(pop, fitness, max_fitness, min_fitness, total_fitness),
+                                   roleta(pop, fitness, max_fitness, min_fitness, total_fitness),
                                    pop, cstrs_list))
 
             if params['tipo_crossover'] == 2:
                 if params['tipo_selecao'] == 1:  # adiciona no final do vetor os filhos retornados pelo crossover 2
                     filhos.extend(simple_two_points_cross
-                                  (pop, roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness),
-                                   roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness),cstrs_list))
+                                  (pop, roleta(pop, fitness, max_fitness, min_fitness, total_fitness),
+                                   roleta(pop, fitness, max_fitness, min_fitness, total_fitness),cstrs_list))
 
             if params['tipo_crossover'] == 3:
                 if params['tipo_selecao'] == 1:  # adiciona no final do vetor os filhos retornados pelo crossover 3
                     filhos.append(simple_random_cross
-                                  (pop, roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness),
-                                   roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness),
+                                  (pop, roleta(pop, fitness, max_fitness, min_fitness, total_fitness),
+                                   roleta(pop, fitness, max_fitness, min_fitness, total_fitness),
                                    dist_matrix, qtd_vehicles, cstrs_list))
 
             if params['tipo_crossover'] == 4:
                 if params['tipo_selecao'] == 1:  # adiciona no final do vetor os filhos retornados pelo crossover 4
                     filhos.append(uniform_cross
-                                  (pop[(roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness))],
-                                   pop[(roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness))],
+                                  (pop[(roleta(pop, fitness, max_fitness, min_fitness, total_fitness))],
+                                   pop[(roleta(pop, fitness, max_fitness, min_fitness, total_fitness))],
                                    dist_matrix, qtd_customers, qtd_vehicles, gama, demands, capacity, size))
 
         else:
             if params['tipo_selecao'] == 1:
-                filhos.append(pop[roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness)])
-                filhos.append(pop[roleta(pop, fitness_populacao, max_fitness, min_fitness, total_fitness)])
+                filhos.append(pop[roleta(pop, fitness, max_fitness, min_fitness, total_fitness)])
+                filhos.append(pop[roleta(pop, fitness, max_fitness, min_fitness, total_fitness)])
 
     # Mutacao
     for i, individuo in enumerate(filhos):
@@ -88,31 +104,27 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
     # Mantem apenas nova geracao
     if params['troca_populacao'] == 1:
         nova_populacao = nova_populacao + filhos
-        # COMENTADO APENAS PARA TESTES DA TROCA DA POPULACAO
-        # novo_fitness = fitness_pop(nova_populacao, dist_matrix, qtd_customers, qtd_vehicles,
-        #                             demands, capacity, gama, size)
-        # for i, fitness in enumerate(novo_fitness):
-        #     pop_plus_fit.append([nova_populacao[i], novo_fitness[i]])
 
-        return nova_populacao, minimo_fitness
     # Junta as duas populacoes, ordena pelo fitness e exclui os piores individuos (nazi) - diminui a diversidade
     else:
-        # linha inserida apenas para o caso do elistismo ser 0
-        nova_populacao = nova_populacao + filhos
-        np.array(nova_populacao)
-        np.array(filhos)
-        # Junta geracao anterior com a atual (elitismo + crossover)
-        nova_populacao = np.concatenate((filhos, pop), axis=0)
-        # ordena pelo fitness e pega os #tamanho_pop melhores
-        novo_fitness = fitness_pop(nova_populacao, dist_matrix, qtd_customers, qtd_vehicles,
-                                    demands, capacity, gama, size)
-        for i, fitness in enumerate(novo_fitness):
-            pop_plus_fit.append([nova_populacao[i], novo_fitness[i]])
+        nova_populacao = nova_populacao + filhos + pop
 
-        nova_populacao = sorted(pop_plus_fit, key=lambda x: x[1])
-        nova_populacao = [individuo[0] for individuo in nova_populacao[:params['tamanho_pop']]]
-        return nova_populacao, minimo_fitness
+    #fitness da nova populacao
+    novo_fitness = fitness_pop(nova_populacao, dist_matrix, qtd_customers, qtd_vehicles,
+                               demands, capacity, gama, size)
+    #concatena em vetor de tuplas
+    for i, fitness in enumerate(novo_fitness):
+        pop_plus_fit.append([nova_populacao[i], fitness])
+    # ordena de acordo com o fitness
+    pop_plus_fit = sorted(pop_plus_fit, key=lambda x: x[1])
+    # Separa Individuo do fitness
+    nova_populacao = [individuo[0] for individuo in pop_plus_fit[:params['tamanho_pop']]]
+    novo_fitness = [individuo[1] for individuo in pop_plus_fit[:params['tamanho_pop']]]
 
+    #Neste momento, todos os vetores usados sao listas
+    return nova_populacao, novo_fitness
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-
 execucao = 0
 fitness_execucoes = []
 

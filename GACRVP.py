@@ -456,8 +456,9 @@ def elitims(tx_elitims, pop, size_pop):
     qtd = int((tx_elitims * size_pop))
     # 0 no lamba por que o fitness, é o primeiro elemento de um item
     # de pop
-    pop = sorted(pop, key=lambda x: x[1])
-    return_pop =  pop[:qtd]
+    # ja chega aqui ordenado
+    # pop = sorted(pop, key=lambda x: x[1])
+    return_pop = pop[:qtd]
     list_pop = []
     for item in return_pop:
         list_pop.append(item[0])
@@ -527,7 +528,7 @@ def evolve(pop, params, dist_matrix, qtd_customers,
 # Parametro: Populacao
 def roleta(populacao, fitness, max_fitness, min_fitness, fitness_total):
     # gera um valor aleatorio dentro do range fitness total
-    aleatorio = np.random.uniform(0, fitness_total)
+    aleatorio = random()*fitness_total
     # range entre maior e menor para usar na roleta de minimizacao
     range_fitness = max_fitness + min_fitness
     # Minimizacao = http://stackoverflow.com/questions/8760473/
