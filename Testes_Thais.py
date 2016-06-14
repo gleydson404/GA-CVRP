@@ -5,6 +5,7 @@ from Distances import euclidian
 from operator import itemgetter
 import datetime
 import time
+import csv
 
 customers, qtd_customers, qtd_vehicles, capacity = load('tests/A-n32-k5.vrp')
 demands = customers[:, 3]
@@ -120,7 +121,7 @@ while execucao < params['execucao']:
     means = []
     worses = []
     resultado = open("/home/gcs/Desktop/" + date + ".csv", "w")
-    csvwriter = csv.DictWriter(f, params.keys()))
+    csvwriter = csv.DictWriter(resultado, params.keys())
     csvwriter.writeheader()
     csvwriter.writerow(params)
     print "execucao: ", execucao
