@@ -95,7 +95,7 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
         nova_populacao = nova_populacao + filhos + pop
         novo_fitness = sorted(fitness_pop(pop, dist_matrix, qtd_customers, qtd_vehicles,
                 demands, capacity, gama, size), key=itemgetter(0), reverse=False)
-        nova_populacao = [individuo[1] for individuo in novo_fitness[0:(params['tamanho_pop'])]]
+        # nova_populacao = [individuo[1] for individuo in novo_fitness[0:(params['tamanho_pop'])]]
 
     #
     # for i in range(len(pop)):
@@ -109,27 +109,37 @@ fitness_execucoes = []
 while execucao < params['execucao']:
     pop = gen_pop(params['tamanho_pop'], qtd_vehicles, qtd_customers, cstrs_list)
     date = datetime.datetime.fromtimestamp(time.time()).strftime('%d-%m-%Y-%H%M%S')
-    resultado = open("/home/gcs/Desktop/" + date + ".txt", "w")
+    procriation = []
+    betters = []
+    means = []
+    worses = []
+    resultado = open("/home/gcs/Desktop/" + date + ".csv", "w")
+    csvwriter = csv.DictWriter(f, params.keys()))
+    csvwriter.writeheader()
+    csvwriter.writerow(params)
     print "execucao: ", execucao
-    resultado.write(str(execucao))
-    resultado.write("\n\n")
+    # resultado.write(str(execucao))
+    # resultado.write("\n\n")
     melhor_fit = []
     print "parametros: ", params
-    resultado.write("\n\n")
-    resultado.write(str(params))
+    # resultado.write("\n\n")
+    # resultado.write(str(params))
 
     geracao = 0
     while geracao < params['geracoes']:
         size = len(pop[0])
         if geracao % 100 == 0:
             print "geracao: ", geracao
-        resultado.write(str(geracao))
-        resultado.write("\n\n")
+        procriation.append(geracao)
+        # resultado.write(str(geracao))
+        # resultado.write("\n\n")
         pop, melhor = pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
         melhor_fit.extend(melhor)
         geracao = geracao + 1
-        resultado.write(str(melhor))
-        resultado.write("\n")
+        # resultado.write(str(melhor))
+        # resultado.write("\n")
+        betters.append(melhor)
+        means.append(np.mean(pop[:, 0]))
     # melhor = sorted(melhor_fit, key=lambda x: x[0])
     # print "Fitness minimo ever: ", min(melhor_fit, key=lambda t: t[0])
     min_melhor_fit = min(melhor_fit, key=itemgetter(0))
