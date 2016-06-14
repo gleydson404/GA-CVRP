@@ -1,11 +1,9 @@
 from GACRVP import *
-import pprint
 import numpy as np
-from Distances import euclidian
-from operator import itemgetter
 import datetime
 import time
 import csv
+import random
 
 customers, qtd_customers, qtd_vehicles, capacity = load('tests/A-n32-k5.vrp')
 demands = customers[:, 3]
@@ -23,6 +21,9 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
     pop_plus_fit = []   # Usado na troca da populacao por algum motivo que eu esqueci
     pop_fitness = []    # Vetor de tuplas (individuo, fitness)
 
+    # shufle da populacao, que provavelmente chega aqui ordenada pelo menor fitness
+    random.shuffle(pop)
+
     # calculo o fitness
     fitness_populacao = fitness_pop(pop, dist_matrix, qtd_customers, qtd_vehicles,
                                     demands, capacity, gama, size)
@@ -32,10 +33,9 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
         pop_fitness.append([pop[i], fitness])
 
     # ordena de acordo com o fitness
-    pop_fitness = sorted(pop_fitness, key=lambda x: x[1])
+    #pop_fitness = sorted(pop_fitness, key=lambda x: x[1])
 
     # Aplicacao do elitismo passando vetor de individuo e fitness ja ordenado
-    # Inclusive, poderia deixar de ser uma funcao, ja ta fazendo tudo aqui mesmo
     if params['taxa_elitismo'] > 0:
         nova_populacao.extend(elitims(params['taxa_elitismo'], pop_fitness, params['tamanho_pop']))
 
@@ -47,8 +47,8 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
     max_fitness = max(fitness)
     min_fitness = min(fitness)
     total_fitness = sum(fitness)
-    print "Melhor Fitness: ", pop_fitness[0][1], "Individuo: ", pop_fitness[0][0]
-    print "Pior Fitness: ", pop_fitness[-1][1], "Individuo: ", pop_fitness[-1][0]
+    print "Melhor Fitness: ", min_fitness
+    print "Pior Fitness: ", max_fitness
 
     # Minimo_fitness servia apenas para retorno, o que acredito que nao sera mais necessario
     # minimo_fitness.append((min_fitness, pop[fitness_populacao.index(min_fitness)]))
@@ -104,7 +104,6 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
     # Mantem apenas nova geracao
     if params['troca_populacao'] == 1:
         nova_populacao = nova_populacao + filhos
-
     # Junta as duas populacoes, ordena pelo fitness e exclui os piores individuos (nazi) - diminui a diversidade
     else:
         nova_populacao = nova_populacao + filhos + pop
@@ -164,10 +163,10 @@ while execucao < params['execucao']:
         # means.append(np.mean(pop[:, 0]))
     # melhor = sorted(melhor_fit, key=lambda x: x[0])
     # print "Fitness minimo ever: ", min(melhor_fit, key=lambda t: t[0])
-    min_melhor_fit = min(melhor_fit, key=itemgetter(0))
-    print "Fitness minimo ever: ", min_melhor_fit
-    resultado.write(str(min_melhor_fit))
-    fitness_execucoes.append(min_melhor_fit)
+    # min_melhor_fit = min(melhor_fit, key=itemgetter(0))
+    # print "Fitness minimo ever: ", min_melhor_fit
+    # resultado.write(str(min_melhor_fit))
+    # fitness_execucoes.append(min_melhor_fit)
     execucao = execucao + 1
     resultado.close()
-print "Melhor fitness de ", params['execucao'], ": ", min(fitness_execucoes)
+# print "Melhor fitness de ", params['execucao'], ": ", min(fitness_execucoes)

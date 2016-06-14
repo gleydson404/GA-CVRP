@@ -457,7 +457,7 @@ def elitims(tx_elitims, pop, size_pop):
     # 0 no lamba por que o fitness, é o primeiro elemento de um item
     # de pop
     # ja chega aqui ordenado
-    # pop = sorted(pop, key=lambda x: x[1])
+    pop = sorted(pop, key=lambda x: x[1])
     return_pop = pop[:qtd]
     list_pop = []
     for item in return_pop:
