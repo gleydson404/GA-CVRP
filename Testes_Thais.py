@@ -15,20 +15,16 @@ gama = 1
 
 pop = gen_pop(params['tamanho_pop'], qtd_vehicles, qtd_customers, cstrs_list)
 
-# print params
-# pp = pprint.PrettyPrinter(indent=4)
-# for individuo in range(len(pop)):
-#     print 'individuo: ', individuo, ': \n'
-#     print pp.pprint(pop[individuo])
-
 def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size):
     nova_populacao = []
     minimo_fitness = []
+    pop_plus_fit = []
     filhos = []
     pop_fitness = []
     fitness_populacao = fitness_pop(pop, dist_matrix, qtd_customers, qtd_vehicles,
                                     demands, capacity, gama, size)
 
+    # Aplicacao do elitismo: Junta num vetor so e calcula o fitness
     for i, fitness in enumerate(fitness_populacao):
         pop_fitness.append([pop[i], fitness])
     nova_populacao.extend(elitims(params['taxa_elitismo'], pop_fitness, params['tamanho_pop']))
@@ -88,20 +84,30 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
                 filhos[i] = simple_mutation(individuo, dist_matrix, qtd_vehicles)
 
     # Troca da Populacao
+    # Mantem apenas nova geracao
     if params['troca_populacao'] == 1:
         nova_populacao = nova_populacao + filhos
-        # Junta as duas populacoes, ordena pelo fitness e exclui os piores individuos (nazi) - diminui a diversidade
+        novo_fitness = fitness_pop(nova_populacao, dist_matrix, qtd_customers, qtd_vehicles,
+                                    demands, capacity, gama, size)
+        for i, fitness in enumerate(novo_fitness):
+            pop_plus_fit.append([nova_populacao[i], novo_fitness[i]])
+
+        return np.array(pop_plus_fit)
+    # Junta as duas populacoes, ordena pelo fitness e exclui os piores individuos (nazi) - diminui a diversidade
     else:
-        nova_populacao = nova_populacao + filhos + pop
-        novo_fitness = sorted(fitness_pop(pop, dist_matrix, qtd_customers, qtd_vehicles,
-                demands, capacity, gama, size), key=itemgetter(0), reverse=False)
-        # nova_populacao = [individuo[1] for individuo in novo_fitness[0:(params['tamanho_pop'])]]
+        np.array(nova_populacao)
+        np.array(filhos)
+        
+        # Junta geracao anterior com a atual (elitismo + crossover)
+        nova_populacao = np.concatenate((nova_populacao, filhos, pop), axis=0)
+        # ordena pelo fitness e pega os #tamanho_pop melhores
+        novo_fitness = fitness_pop(nova_populacao, dist_matrix, qtd_customers, qtd_vehicles,
+                                    demands, capacity, gama, size)
+        for i, fitness in enumerate(novo_fitness):
+            pop_plus_fit.append([nova_populacao[i], novo_fitness[i]])
 
-    #
-    # for i in range(len(pop)):
-    #     print nova_populacao[i], fitness_populacao[i]
-
-    return nova_populacao, minimo_fitness
+        pop_plus_fit = sorted(pop_plus_fit, key=lambda x: x[1])
+        return np.array(pop_plus_fit) 
 
 execucao = 0
 fitness_execucoes = []
@@ -133,7 +139,7 @@ while execucao < params['execucao']:
         procriation.append(geracao)
         # resultado.write(str(geracao))
         # resultado.write("\n\n")
-        pop, melhor = pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
+        pop, melhor = pokemon(pop[:, 0], dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
         melhor_fit.extend(melhor)
         geracao = geracao + 1
         # resultado.write(str(melhor))

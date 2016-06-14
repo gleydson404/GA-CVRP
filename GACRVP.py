@@ -470,13 +470,17 @@ def cross_revisor(custumers, childs):
     for i in range(len(childs)):
         offspring = childs[i]
         repeated = np.zeros(len(custumers) + 1)
+        # Conta clientes repetidos
         for x in offspring:
             if x != '#':
                 repeated[int(x)] += 1
+        # Apaga o primeiro repetido que encontrar no vetor
         for x in range(len(repeated)):
             if repeated[x] > 1:
                 offspring.remove(str(x))
-        for j in custumers:
+        # verifica se todos os clientes estão na rota,
+        # se não, insere aleatoriamente
+        for j in custumers[1:len(custumers)]:
             if str(j) not in offspring:
                 offspring.insert(randint(0, len(offspring)-1), str(j))
         trucks = [x for x in offspring if x == '#']
