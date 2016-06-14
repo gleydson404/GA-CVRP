@@ -53,6 +53,7 @@ load_parameters	GACRVP.py	/^def load_parameters(file):$/;"	f
 m	Distances.py	/^import math as m$/;"	i
 main	GACRVP.py	/^def main():$/;"	f
 melhor_fit	Testes_Thais.py	/^    melhor_fit = []$/;"	v
+min_melhor_fit	Testes_Thais.py	/^    min_melhor_fit = min(melhor_fit, key=itemgetter(0))$/;"	v
 np	Distances.py	/^import numpy as np$/;"	i
 np	GACRVP.py	/^import numpy as np$/;"	i
 np	LoadTests.py	/^import numpy as np$/;"	i
@@ -70,18 +71,18 @@ pprint	Test.py	/^import pprint$/;"	i
 pprint	Testes_Thais.py	/^import pprint$/;"	i
 randint	GACRVP.py	/^from random import randint, choice, random$/;"	i
 random	GACRVP.py	/^from random import randint, choice, random$/;"	i
-resultado	Testes_Thais.py	/^    resultado = open("C:\\Users\\Thais\\Documents\\GitHub\\GA-CVRP\\GA-CVRP\\Testes\\GA_" + date + ".txt", "w")$/;"	v
+resultado	Testes_Thais.py	/^    resultado = open("\/home\/gcs\/Desktop\/" + date + ".txt", "w")$/;"	v
 reverse_mutation	GACRVP.py	/^def reverse_mutation(individual, size_ind, qtd_vehicles):$/;"	f
 roleta	GACRVP.py	/^def roleta(populacao, fitness, max_fitness, min_fitness, fitness_total):$/;"	f
 simple_mutation	GACRVP.py	/^def simple_mutation(individual, dist_matrix, qtd_vehicles):$/;"	f
 simple_one_point_cross	GACRVP.py	/^def simple_one_point_cross(father, mother, pop, custumers):$/;"	f
 simple_random_cross	GACRVP.py	/^def simple_random_cross(pop, father, mother, dist_matrix, qtd_vehicles, custumers):$/;"	f
 simple_two_points_cross	GACRVP.py	/^def simple_two_points_cross(pop, father, mother, custumers):$/;"	f
-size	Test.py	/^size = len(v)$/;"	v
+size	Test.py	/^size = len(tst)$/;"	v
 size	Testes_Thais.py	/^        size = len(pop[0])$/;"	v
 swap_mutation	GACRVP.py	/^def swap_mutation(individual):$/;"	f
 tbis	Test.py	/^tbis = ['25', '16', '26', '2', '14', '20', '19', '24', '1', '#', '27', '#', '21', '22', '23', '28',$/;"	v
 time	Testes_Thais.py	/^import time$/;"	i
+tst	Test.py	/^tst = ['13', '2', '17', '31', '#',$/;"	v
 tst	Test.py	/^tst = ['21', '31', '19', '17', '13', '7', '26', '#',$/;"	v
 uniform_cross	GACRVP.py	/^def uniform_cross(father, mother, dist_matrix,$/;"	f
-v	Test.py	/^v = []$/;"	v

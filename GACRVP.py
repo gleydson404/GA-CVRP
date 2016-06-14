@@ -34,7 +34,7 @@ def gen_ind(qtd_vehicles, qtd_customers, cstrs_list):
     # fixme vehicles vai ser gerado para cada individuo tirar
     # de dentro da funcao e passar como parametro
     vehicles = ['#' for _ in xrange(qtd_vehicles - 1)]
-    individual = np.hstack((cstrs_list, vehicles))
+    individual = np.hstack((cstrs_list[1:qtd_customers], vehicles))
     np.random.shuffle(individual)
     return individual
 
@@ -336,7 +336,7 @@ def reverse_mutation(individual, size_ind, qtd_vehicles):
     rota = rotas[veiculo]
     rota_aux = []
     for cliente in xrange(len(rota)):
-        rota_aux.extend(rota[len(rota)-1-cliente])
+        rota_aux.append(rota[len(rota)-1-cliente])
     rotas[veiculo] = rota_aux
     return get_individual_from_vehicle(rotas, qtd_vehicles)
 
@@ -374,7 +374,7 @@ def best_insertion(routes, client, dist_matrix):
     destino = []
     # cliente = [client]
     cliente = client
-    closer = (2*np.amax(dist_matrix)) * -1
+    closer = (2*np.amax(dist_matrix)) * - 1
     k1 = int(cliente[0])
     kn = int(cliente[len(cliente)-1])
     for veiculo in range(len(routes)):

@@ -36,19 +36,12 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
     max_fitness = max(fitness_populacao)
     # print "max fitness: ", max_fitness
     min_fitness = min(fitness_populacao)
-    minimo_fitness.append(min(fitness_populacao))
-
+    minimo_fitness.append((min_fitness, pop[fitness_populacao.index(min_fitness)]))
     # so vai funcionar se houver elitismo
     print "min fitness: ", pop_fitness[0][1]
     total_fitness = sum(fitness_populacao)
 
-    # Aplica elitismo: elitims(tx_elitims, pop, size_pop)
-    elitismo = 0
-    elitismo = int(np.round(params["tamanho_pop"] * params["taxa_elitismo"]))
-    for item in range(elitismo):
-        nova_populacao.append(pop[item])
-
-    while len(filhos) < (params['tamanho_pop'] - elitismo):
+    while len(filhos) < (params['tamanho_pop'] - (params['taxa_elitismo'] * params['tamanho_pop'])):
         prob_crossover = np.random.uniform(0, 1)
         if prob_crossover <= params['taxa_crossover']:
             if params['tipo_crossover'] == 1:
@@ -133,13 +126,16 @@ while execucao < params['execucao']:
         resultado.write(str(geracao))
         resultado.write("\n\n")
         pop, melhor = pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
-        melhor_fit.append(melhor)
+        melhor_fit.extend(melhor)
         geracao = geracao + 1
         resultado.write(str(melhor))
         resultado.write("\n")
-    print "Fitness minimo ever: ", min(melhor_fit)
-    resultado.write(str(min(melhor_fit)))
-    fitness_execucoes.append(min(melhor_fit))
+    # melhor = sorted(melhor_fit, key=lambda x: x[0])
+    # print "Fitness minimo ever: ", min(melhor_fit, key=lambda t: t[0])
+    min_melhor_fit = min(melhor_fit, key=itemgetter(0))
+    print "Fitness minimo ever: ", min_melhor_fit
+    resultado.write(str(min_melhor_fit))
+    fitness_execucoes.append(min_melhor_fit)
     execucao = execucao + 1
     resultado.close()
 print "Melhor fitness de ", params['execucao'], ": ", min(fitness_execucoes)
