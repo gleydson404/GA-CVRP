@@ -3,7 +3,7 @@
 	"geracoes": 500,
 	"taxa_crossover": 1,
 	"taxa_mutacao": 1,
-	"taxa_elitismo": 0.5,
+	"taxa_elitismo": 0,
 	"tipo_crossover": 3,
 	"tipo_mutacao": 3,
 	"tipo_selecao": 1,

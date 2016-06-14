@@ -88,27 +88,30 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
     # Mantem apenas nova geracao
     if params['troca_populacao'] == 1:
         nova_populacao = nova_populacao + filhos
-        novo_fitness = fitness_pop(nova_populacao, dist_matrix, qtd_customers, qtd_vehicles,
-                                    demands, capacity, gama, size)
-        for i, fitness in enumerate(novo_fitness):
-            pop_plus_fit.append([nova_populacao[i], novo_fitness[i]])
+        # COMENTADO APENAS PARA TESTES DA TROCA DA POPULACAO
+        # novo_fitness = fitness_pop(nova_populacao, dist_matrix, qtd_customers, qtd_vehicles,
+        #                             demands, capacity, gama, size)
+        # for i, fitness in enumerate(novo_fitness):
+        #     pop_plus_fit.append([nova_populacao[i], novo_fitness[i]])
 
-        return np.array(pop_plus_fit)
+        return nova_populacao, minimo_fitness
     # Junta as duas populacoes, ordena pelo fitness e exclui os piores individuos (nazi) - diminui a diversidade
     else:
+        # linha inserida apenas para o caso do elistismo ser 0
+        nova_populacao = nova_populacao + filhos
         np.array(nova_populacao)
         np.array(filhos)
-        
         # Junta geracao anterior com a atual (elitismo + crossover)
-        nova_populacao = np.concatenate((nova_populacao, filhos, pop), axis=0)
+        nova_populacao = np.concatenate((filhos, pop), axis=0)
         # ordena pelo fitness e pega os #tamanho_pop melhores
         novo_fitness = fitness_pop(nova_populacao, dist_matrix, qtd_customers, qtd_vehicles,
                                     demands, capacity, gama, size)
         for i, fitness in enumerate(novo_fitness):
             pop_plus_fit.append([nova_populacao[i], novo_fitness[i]])
 
-        pop_plus_fit = sorted(pop_plus_fit, key=lambda x: x[1])
-        return np.array(pop_plus_fit) 
+        nova_populacao = sorted(pop_plus_fit, key=lambda x: x[1])
+        nova_populacao = [individuo[0] for individuo in nova_populacao[:params['tamanho_pop']]]
+        return nova_populacao, minimo_fitness
 
 execucao = 0
 fitness_execucoes = []
@@ -120,7 +123,7 @@ while execucao < params['execucao']:
     betters = []
     means = []
     worses = []
-    resultado = open("/home/gcs/Desktop/" + date + ".csv", "w")
+    resultado = open("" + date + ".csv", "w")
     csvwriter = csv.DictWriter(resultado, params.keys())
     csvwriter.writeheader()
     csvwriter.writerow(params)
@@ -140,13 +143,13 @@ while execucao < params['execucao']:
         procriation.append(geracao)
         # resultado.write(str(geracao))
         # resultado.write("\n\n")
-        pop, melhor = pokemon(pop[:, 0], dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
+        pop, melhor = pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
         melhor_fit.extend(melhor)
         geracao = geracao + 1
         # resultado.write(str(melhor))
         # resultado.write("\n")
         betters.append(melhor)
-        means.append(np.mean(pop[:, 0]))
+        # means.append(np.mean(pop[:, 0]))
     # melhor = sorted(melhor_fit, key=lambda x: x[0])
     # print "Fitness minimo ever: ", min(melhor_fit, key=lambda t: t[0])
     min_melhor_fit = min(melhor_fit, key=itemgetter(0))
