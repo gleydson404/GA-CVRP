@@ -543,6 +543,7 @@ def roleta(populacao, fitness, max_fitness, min_fitness, fitness_total):
             return index
     return size_pop - 1
 
+
 def plot_graph(betters, means, stdr_dev, procriation, path):
     plot_lines = []
     plt.title("Genetic Algorithm ")
@@ -565,6 +566,7 @@ def plot_graph(betters, means, stdr_dev, procriation, path):
     plt.savefig(path + "grafico_evolucao.eps")
     plt.savefig(path + "grafico_evolucao.png")
     plt.close()
+
 
 def clean_str(string):
     remove = ['\'', ']', '[', '(', ')', ',', ' ']

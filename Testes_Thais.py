@@ -124,7 +124,6 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
     # Separa Individuo do fitness
     nova_populacao = [individuo[0] for individuo in pop_plus_fit[:params['tamanho_pop']]]
     novo_fitness = [individuo[1] for individuo in pop_plus_fit[:params['tamanho_pop']]]
-
     #Neste momento, todos os vetores usados sao listas
     return nova_populacao, novo_fitness
 
@@ -164,6 +163,9 @@ while execucao < params['execucao']:
     best_ind = 0
     best_fit = 0
     geracao = 1
+    mean_count = 0
+    last_mean = 0
+    cv = 0
     while geracao < params['geracoes']:
         size = len(pop[0])
         if geracao % 100 == 0:
@@ -172,7 +174,7 @@ while execucao < params['execucao']:
         # resultado.write(str(geracao))
         # resultado.write("\n\n")
         pop, melhor = pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
-        best_fit = np.min(melhor) 
+        best_fit = np.min(melhor)
         best_ind = pop[melhor.index(best_fit)] 
         melhor_fit.extend(melhor)
         geracao = geracao + 1
@@ -182,6 +184,28 @@ while execucao < params['execucao']:
         means.append(np.around(np.mean(melhor), decimals=2))
         worses.append(np.max(melhor))
         stdr_dev.append(np.around(np.std(melhor), decimals=2))
+
+        # Criterio de parada pela variacao da media
+        if geracao == 1:
+            last_mean = means[-1]
+            mean_count = 0
+        else:
+            if mean_count >= params['mean_variation']:
+                print 'Criterio de parada por media.'
+                break
+            if last_mean == means[-1]:
+                mean_count += 1
+            else:
+                last_mean = means[-1]
+                mean_count = 0
+        # Criterio de parada por coeficiente de variacao
+        # Cv < 15 % → baixa dispersão: dados homogêneos
+        # 15 < Cv > 30 % → média dispersão
+        # Cv > 30 % → alta dispersão: dados heterogêneos
+        cv = (np.std(melhor) / np.mean(melhor)) * 100
+        if cv < params['c_variation']:
+            print 'Criterio de parada por cv.'
+            break
     # melhor = sorted(melhor_fit, key=lambda x: x[0])
     # print "Fitness minimo ever: ", min(melhor_fit, key=lambda t: t[0])
     # min_melhor_fit = min(melhor_fit, key=itemgetter(0))
