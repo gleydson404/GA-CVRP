@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from GACRVP import *
 import numpy as np
 import datetime
@@ -130,14 +131,20 @@ fitness_execucoes = []
 while execucao < params['execucao']:
     pop = gen_pop(params['tamanho_pop'], qtd_vehicles, qtd_customers, cstrs_list)
     date = datetime.datetime.fromtimestamp(time.time()).strftime('%d-%m-%Y-%H%M%S')
-    procriation = []
-    betters = []
-    means = []
-    worses = []
-    resultado = open("" + date + ".csv", "w")
-    csvwriter = csv.DictWriter(resultado, params.keys())
-    csvwriter.writeheader()
-    csvwriter.writerow(params)
+    params_list = []
+    for key, value in params.iteritems():
+        temp = [key,value]
+        params_list.append(temp)
+
+    procriation = ['geracções']
+    betters = ['Melhores']
+    means = ['Média']
+    worses = ['Piores']
+    stdr_dev = ['Desvio Padrão']
+    resultado = open("results/" + date + ".csv", 'wb')
+    csvwriter = csv.writer(resultado, dialect='excel',  delimiter=',',
+                           quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    csvwriter.writerow(params_list)
     print "execucao: ", execucao
     # resultado.write(str(execucao))
     # resultado.write("\n\n")
@@ -159,8 +166,10 @@ while execucao < params['execucao']:
         geracao = geracao + 1
         # resultado.write(str(melhor))
         # resultado.write("\n")
-        betters.append(melhor)
-        # means.append(np.mean(pop[:, 0]))
+        betters.append(np.min(melhor))
+        means.append(np.around(np.mean(melhor), decimals=2))
+        worses.append(np.max(melhor))
+        stdr_dev.append(np.around(np.std(melhor), decimals=2))
     # melhor = sorted(melhor_fit, key=lambda x: x[0])
     # print "Fitness minimo ever: ", min(melhor_fit, key=lambda t: t[0])
     # min_melhor_fit = min(melhor_fit, key=itemgetter(0))
@@ -168,5 +177,10 @@ while execucao < params['execucao']:
     # resultado.write(str(min_melhor_fit))
     # fitness_execucoes.append(min_melhor_fit)
     execucao = execucao + 1
+    csvwriter.writerow(procriation)
+    csvwriter.writerow(betters)
+    csvwriter.writerow(worses)
+    csvwriter.writerow(means)
+    csvwriter.writerow(stdr_dev)
     resultado.close()
 # print "Melhor fitness de ", params['execucao'], ": ", min(fitness_execucoes)
