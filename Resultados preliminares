@@ -1,0 +1,225 @@
+{
+	"tamanho_pop": 1000,
+	"geracoes": 10000,
+	"taxa_crossover": 0.9,
+	"taxa_mutacao": 0.5,
+	"taxa_elitismo": 0.05,
+	"tipo_crossover": 1,
+	"tipo_mutacao": 3,
+	"tipo_selecao": 1,
+	"n_torneio": 5,
+	"troca_populacao": 1,
+	"execucao": 5
+} 750
+
+{
+	"tamanho_pop": 1000,
+	"geracoes": 10000,
+	"taxa_crossover": 0.9,
+	"taxa_mutacao": 0.5,
+	"taxa_elitismo": 0.05,
+	"tipo_crossover": 2,
+	"tipo_mutacao": 3,
+	"tipo_selecao": 1,
+	"n_torneio": 5,
+	"troca_populacao": 1,
+	"execucao": 5
+} 779
+
+{
+	"tamanho_pop": 1000,
+	"geracoes": 10000,
+	"taxa_crossover": 0.9,
+	"taxa_mutacao": 0.5,
+	"taxa_elitismo": 0.05,
+	"tipo_crossover": 3,
+	"tipo_mutacao": 3,
+	"tipo_selecao": 1,
+	"n_torneio": 5,
+	"troca_populacao": 1,
+	"execucao": 5
+} 1150
+
+{
+	"tamanho_pop": 1000,
+	"geracoes": 10000,
+	"taxa_crossover": 0.9,
+	"taxa_mutacao": 0.5,
+	"taxa_elitismo": 0.05,
+	"tipo_crossover": 4,
+	"tipo_mutacao": 3,
+	"tipo_selecao": 1,
+	"n_torneio": 5,
+	"troca_populacao": 1,
+	"execucao": 5
+} 962
+
+{
+	"tamanho_pop": 1000,
+	"geracoes": 10000,
+	"taxa_crossover": 0.9,
+	"taxa_mutacao": 0,
+	"taxa_elitismo": 0.05,
+	"tipo_crossover": 1,
+	"tipo_mutacao": 3,
+	"tipo_selecao": 1,
+	"n_torneio": 5,
+	"troca_populacao": 2,
+	"execucao": 5
+} 785
+
+{
+	"tamanho_pop": 1000,
+	"geracoes": 10000,
+	"taxa_crossover": 0.9,
+	"taxa_mutacao": 0,
+	"taxa_elitismo": 0.05,
+	"tipo_crossover": 2,
+	"tipo_mutacao": 3,
+	"tipo_selecao": 1,
+	"n_torneio": 5,
+	"troca_populacao": 2,
+	"execucao": 5
+} 814
+
+{
+	"tamanho_pop": 1000,
+	"geracoes": 10000,
+	"taxa_crossover": 0.9,
+	"taxa_mutacao": 0,
+	"taxa_elitismo": 0.05,
+	"tipo_crossover": 3,
+	"tipo_mutacao": 3,
+	"tipo_selecao": 1,
+	"n_torneio": 5,
+	"troca_populacao": 2,
+	"execucao": 5
+} 1109
+
+{
+	"tamanho_pop": 1000,
+	"geracoes": 10000,
+	"taxa_crossover": 0.9,
+	"taxa_mutacao": 0,
+	"taxa_elitismo": 0.05,
+	"tipo_crossover": 4,
+	"tipo_mutacao": 3,
+	"tipo_selecao": 1,
+	"n_torneio": 5,
+	"troca_populacao": 2,
+	"execucao": 5
+} 1553
+
+{
+	"tamanho_pop": 1000,
+	"geracoes": 10000,
+	"taxa_crossover": 0.9,
+	"taxa_mutacao": 0.1,
+	"taxa_elitismo": 0.05,
+	"tipo_crossover": 1,
+	"tipo_mutacao": 1,
+	"tipo_selecao": 1,
+	"n_torneio": 5,
+	"troca_populacao": 1,
+	"execucao": 5
+} 766
+
+{
+	"tamanho_pop": 1000,
+	"geracoes": 10000,
+	"taxa_crossover": 0.9,
+	"taxa_mutacao": 0.1,
+	"taxa_elitismo": 0.05,
+	"tipo_crossover": 1,
+	"tipo_mutacao": 2,
+	"tipo_selecao": 1,
+	"n_torneio": 5,
+	"troca_populacao": 1,
+	"execucao": 5
+} 749
+
+{
+	"tamanho_pop": 1000,
+	"geracoes": 10000,
+	"taxa_crossover": 0.9,
+	"taxa_mutacao": 0.1,
+	"taxa_elitismo": 0.05,
+	"tipo_crossover": 2,
+	"tipo_mutacao": 1,
+	"tipo_selecao": 1,
+	"n_torneio": 5,
+	"troca_populacao": 1,
+	"execucao": 5
+} 758
+
+{
+	"tamanho_pop": 1000,
+	"geracoes": 10000,
+	"taxa_crossover": 0.9,
+	"taxa_mutacao": 0.1,
+	"taxa_elitismo": 0.05,
+	"tipo_crossover": 2,
+	"tipo_mutacao": 2,
+	"tipo_selecao": 1,
+	"n_torneio": 5,
+	"troca_populacao": 1,
+	"execucao": 5
+} 767
+
+{
+	"tamanho_pop": 1000,
+	"geracoes": 10000,
+	"taxa_crossover": 0.9,
+	"taxa_mutacao": 0.1,
+	"taxa_elitismo": 0.05,
+	"tipo_crossover": 3,
+	"tipo_mutacao": 1,
+	"tipo_selecao": 1,
+	"n_torneio": 5,
+	"troca_populacao": 1,
+	"execucao": 5
+} 886
+
+{
+	"tamanho_pop": 1000,
+	"geracoes": 10000,
+	"taxa_crossover": 0.9,
+	"taxa_mutacao": 0.1,
+	"taxa_elitismo": 0.05,
+	"tipo_crossover": 3,
+	"tipo_mutacao": 2,
+	"tipo_selecao": 1,
+	"n_torneio": 5,
+	"troca_populacao": 1,
+	"execucao": 5
+} 1444
+
+{
+	"tamanho_pop": 1000,
+	"geracoes": 10000,
+	"taxa_crossover": 0.9,
+	"taxa_mutacao": 0.1,
+	"taxa_elitismo": 0.05,
+	"tipo_crossover": 4,
+	"tipo_mutacao": 1,
+	"tipo_selecao": 1,
+	"n_torneio": 5,
+	"troca_populacao": 1,
+	"execucao": 5
+} 1297
+
+{
+	"tamanho_pop": 1000,
+	"geracoes": 10000,
+	"taxa_crossover": 0.9,
+	"taxa_mutacao": 0.1,
+	"taxa_elitismo": 0.05,
+	"tipo_crossover": 4,
+	"tipo_mutacao": 1,
+	"tipo_selecao": 1,
+	"n_torneio": 5,
+	"troca_populacao": 1,
+	"execucao": 5
+} 1640
+
+
