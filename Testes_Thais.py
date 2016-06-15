@@ -177,7 +177,7 @@ while execucao < params['execucao']:
         best_fit = np.min(melhor)
         best_ind = pop[melhor.index(best_fit)] 
         melhor_fit.extend(melhor)
-        geracao = geracao + 1
+
         # resultado.write(str(melhor))
         # resultado.write("\n")
         betters.append(best_fit)
@@ -198,14 +198,21 @@ while execucao < params['execucao']:
             else:
                 last_mean = means[-1]
                 mean_count = 0
+
         # Criterio de parada por coeficiente de variacao
         # Cv < 15 % → baixa dispersão: dados homogêneos
         # 15 < Cv > 30 % → média dispersão
         # Cv > 30 % → alta dispersão: dados heterogêneos
-        cv = (np.std(melhor) / np.mean(melhor)) * 100
-        if cv < params['c_variation']:
-            print 'Criterio de parada por cv.'
-            break
+        if geracao == 1:
+            melhor_old = melhor
+        else:
+            cv = (np.std([melhor, melhor_old]) / np.mean([means[-1], means[-2]])) * 100
+            melhor_old = melhor
+            if cv < params['c_variation']:
+                print 'Criterio de parada por cv.'
+                break
+
+        geracao = geracao + 1
     # melhor = sorted(melhor_fit, key=lambda x: x[0])
     # print "Fitness minimo ever: ", min(melhor_fit, key=lambda t: t[0])
     # min_melhor_fit = min(melhor_fit, key=itemgetter(0))
