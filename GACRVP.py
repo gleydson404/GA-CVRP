@@ -21,7 +21,7 @@ from random import randint, choice, random
 import json
 import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
-
+from cycler import cycler
 
 # Lendo arquivo de configuracao .json
 def load_parameters(file):
@@ -564,13 +564,41 @@ def plot_graph(betters, means, stdr_dev, procriation, path):
     # plt.show()
     plt.savefig(path + "grafico_evolucao.eps")
     plt.savefig(path + "grafico_evolucao.png")
-
+    plt.close()
 
 def clean_str(string):
     remove = ['\'', ']', '[', '(', ')', ',', ' ']
     for item in remove:
         string = string.replace(item, "")
     return string
+
+
+def plot_route(ind, coords, path):
+    routes = get_routes_per_vehicle(ind, len(ind))
+    x_coord = coords[:, 0]
+    y_coord = coords[:, 1]
+    plt.figure(1)
+    plt.title("Melhor Rota")
+    plt.rc('axes', prop_cycle=(cycler('color', ['r', 'g', 'b', 'y', 'k', 'c', 'm'])))
+    for route in routes:
+        # todo mundo comeca na posicao 0 do vetor de 
+        # coordenadas
+        route_coord_x = [int(x_coord[0])]
+        route_coord_y = [int(y_coord[0])]
+        for item in route:
+            # fix-me é isso mesmo aqui no indice?
+            route_coord_x.append(x_coord[int(item) - 1])
+            route_coord_y.append(y_coord[int(item) - 1])
+        # todo mundo volta pra posicao 0
+        route_coord_x.append(int(x_coord[0]))
+        route_coord_y.append(int(y_coord[0]))
+        plt.plot(route_coord_x, route_coord_y, 'o-')
+
+    plt.savefig(path + "Melhor_rota.png")
+    plt.savefig(path + "Melhor_rota.eps")
+    plt.close()
+
+
 
 
 def main():

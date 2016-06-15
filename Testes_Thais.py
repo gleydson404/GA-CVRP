@@ -161,6 +161,8 @@ while execucao < params['execucao']:
     # resultado.write("\n\n")
     # resultado.write(str(params))
 
+    best_ind = 0
+    best_fit = 0
     geracao = 1
     while geracao < params['geracoes']:
         size = len(pop[0])
@@ -170,11 +172,13 @@ while execucao < params['execucao']:
         # resultado.write(str(geracao))
         # resultado.write("\n\n")
         pop, melhor = pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
+        best_fit = np.min(melhor) 
+        best_ind = pop[melhor.index(best_fit)] 
         melhor_fit.extend(melhor)
         geracao = geracao + 1
         # resultado.write(str(melhor))
         # resultado.write("\n")
-        betters.append(np.min(melhor))
+        betters.append(best_fit)
         means.append(np.around(np.mean(melhor), decimals=2))
         worses.append(np.max(melhor))
         stdr_dev.append(np.around(np.std(melhor), decimals=2))
@@ -190,7 +194,10 @@ while execucao < params['execucao']:
     csvwriter.writerow(worses)
     csvwriter.writerow(means)
     csvwriter.writerow(stdr_dev)
+    csvwriter.writerow(['Melhor Fitness', np.min(betters[1:])])
+    csvwriter.writerow(['Melhor Individuo', best_ind])
     resultado.close()
     
     plot_graph(betters, means, stdr_dev, procriation, path) 
+    plot_route(best_ind, customers[:, 1:3], path)
 # print "Melhor fitness de ", params['execucao'], ": ", min(fitness_execucoes)
