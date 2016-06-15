@@ -18,8 +18,10 @@ import numpy as np
 from Distances import euclidian as ec
 from LoadTests import load
 from random import randint, choice, random
-import gc
 import json
+import matplotlib.lines as mlines
+import matplotlib.pyplot as plt
+
 
 # Lendo arquivo de configuracao .json
 def load_parameters(file):
@@ -541,6 +543,35 @@ def roleta(populacao, fitness, max_fitness, min_fitness, fitness_total):
             return index
     return size_pop - 1
 
+def plot_graph(betters, means, stdr_dev, procriation, path):
+    plot_lines = []
+    plt.title("Genetic Algorithm ")
+    plt.plot(procriation[1:], betters[1:], color='blue', linewidth=4, linestyle='-')
+    plt.plot(procriation[1:], means[1:], color='green', linewidth=4, linestyle='-.')
+    plt.plot(procriation[1:], stdr_dev[1:], color="red", linewidth=4, linestyle='--')
+
+    blue_line = mlines.Line2D([], [], color='blue')
+    green_line = mlines.Line2D([], [], color='green')
+    red_line = mlines.Line2D([], [], color='red')
+    plot_lines.append([blue_line, green_line, red_line])
+
+    legend1 = plt.legend(plot_lines[0], ["Best Fitness", "Mean Fitness", "Standart Deviation"], loc=1)
+    plt.grid(True)
+    plt.autoscale()
+    plt.gca().add_artist(legend1)
+    plt.xlabel("Generations")
+    plt.ylabel("Fitness")
+    # plt.show()
+    plt.savefig(path + "grafico_evolucao.eps")
+    plt.savefig(path + "grafico_evolucao.png")
+
+
+def clean_str(string):
+    remove = ['\'', ']', '[', '(', ')', ',', ' ']
+    for item in remove:
+        string = string.replace(item, "")
+    return string
+
 
 def main():
     # clientes com suas localidades vem do arquivo de teste
@@ -570,4 +601,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

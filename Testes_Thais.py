@@ -5,6 +5,10 @@ import datetime
 import time
 import csv
 import random
+import matplotlib.lines as mlines
+import matplotlib.pyplot as plt
+import os.path
+
 
 customers, qtd_customers, qtd_vehicles, capacity = load('tests/A-n32-k5.vrp')
 demands = customers[:, 3]
@@ -130,7 +134,6 @@ fitness_execucoes = []
 
 while execucao < params['execucao']:
     pop = gen_pop(params['tamanho_pop'], qtd_vehicles, qtd_customers, cstrs_list)
-    date = datetime.datetime.fromtimestamp(time.time()).strftime('%d-%m-%Y-%H%M%S')
     params_list = []
     for key, value in params.iteritems():
         temp = [key,value]
@@ -141,7 +144,12 @@ while execucao < params['execucao']:
     means = ['Média']
     worses = ['Piores']
     stdr_dev = ['Desvio Padrão']
-    resultado = open("results/" + date + ".csv", 'wb')
+    name_log = "".join(str(params.items()))
+    path = "results/" + name_log + "/"
+    path = clean_str(path) 
+    if not os.path.exists(path):
+        os.makedirs(path)
+    resultado = open(path + "log.csv", 'wb')
     csvwriter = csv.writer(resultado, dialect='excel',  delimiter=',',
                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
     csvwriter.writerow(params_list)
@@ -153,7 +161,7 @@ while execucao < params['execucao']:
     # resultado.write("\n\n")
     # resultado.write(str(params))
 
-    geracao = 0
+    geracao = 1
     while geracao < params['geracoes']:
         size = len(pop[0])
         if geracao % 100 == 0:
@@ -183,4 +191,6 @@ while execucao < params['execucao']:
     csvwriter.writerow(means)
     csvwriter.writerow(stdr_dev)
     resultado.close()
+    
+    plot_graph(betters, means, stdr_dev, procriation, path) 
 # print "Melhor fitness de ", params['execucao'], ": ", min(fitness_execucoes)
