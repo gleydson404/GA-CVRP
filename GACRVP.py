@@ -118,15 +118,12 @@ def get_routes_per_vehicle(individual, size_individual):
     routes = []
     elesments = []
     for i in xrange(size_individual + 1):
-        try:
-            if individual[i] != '#':
-                elesments.append(individual[i])
-            else:
-                if elesments:
-                    routes.append(elesments[:])
-                    elesments[:] = []
-        except ValueError:
-            print 'individuo errado', individual
+        if individual[i] != '#':
+            elesments.append(individual[i])
+        else:
+            if elesments:
+                routes.append(elesments[:])
+                elesments[:] = []
     return routes
 
 
@@ -169,19 +166,19 @@ def dist_veiculo(routes_ind, dist_matrix, qtd_customers,
 # =-=-=-=-=-=-=-=-=-=-=- OPERADORES =-=-=-=-=-=-=-=-=-=-=-=-=- #
 
 
-def simple_one_point_cross(father, mother, pop, custumers):
+def simple_one_point_cross(father, mother, pop, custumers, qtd_vehicles):
     father = pop[father]
     mother = pop[mother]
     point = randint(0, len(father)-1)
     child_1 = np.append(father[0: point], mother[point: len(mother)])
     child_2 = np.append(mother[0: point], father[point: len(mother)])
-    childs = cross_revisor(custumers, [child_1.tolist(), child_2.tolist()])
+    childs = cross_revisor(custumers, [child_1.tolist(), child_2.tolist()], qtd_vehicles)
     child_1 = childs[0]
     child_2 = childs[1]
     return child_1, child_2
 
 
-def simple_two_points_cross(pop, father, mother, custumers):
+def simple_two_points_cross(pop, father, mother, custumers, qtd_vehicles):
     father = pop[father]
     mother = pop[mother]
     point_1 = randint(1, len(father) - 1)
@@ -190,7 +187,7 @@ def simple_two_points_cross(pop, father, mother, custumers):
     child_1 = np.append(child_1, father[point_2: len(father)])
     child_2 = np.append(mother[0: point_1], father[point_1: point_2])
     child_2 = np.append(child_2, mother[point_2: len(mother)])
-    childs = cross_revisor(custumers, [child_1.tolist(), child_2.tolist()])
+    childs = cross_revisor(custumers, [child_1.tolist(), child_2.tolist()], qtd_vehicles)
     child_1 = childs[0]
     child_2 = childs[1]
     return child_1, child_2
@@ -212,7 +209,7 @@ def simple_random_cross(pop, father, mother, dist_matrix, qtd_vehicles, custumer
         route, best_ind = best_insertion(off_subroute, subroute, dist_matrix)
         off_subroute.insert(best_ind, subroute)
         offspring_subroutes.insert(sub_off_index, np.hstack(off_subroute))
-        childs = cross_revisor(custumers, [get_individual_from_vehicle(offspring_subroutes, qtd_vehicles)])
+        childs = cross_revisor(custumers, [get_individual_from_vehicle(offspring_subroutes, qtd_vehicles)], qtd_vehicles)
         child_1 = childs[0]
         return np.array(child_1)
     else:
@@ -518,7 +515,7 @@ def elitims(tx_elitims, pop, size_pop):
 
 # Recebe o resultado de um crosssover e checa se eh factivel
 # Devolve uma rota corrigida
-def cross_revisor(custumers, childs):
+def cross_revisor(custumers, childs, qtd_vehicles):
     for i in range(len(childs)):
         offspring = childs[i]
         repeated = np.zeros(len(custumers) + 1)
@@ -537,11 +534,11 @@ def cross_revisor(custumers, childs):
                 offspring.insert(randint(0, len(offspring)-1), str(j))
         trucks = [x for x in offspring if x == '#']
         n_trucks = len(trucks)
-        while n_trucks < 4:
+        while n_trucks < qtd_vehicles - 1:
             offspring.insert(randint(0, len(offspring)-1), '#')
             n_trucks += 1
         n_trucks = len(trucks)
-        while n_trucks > 4:
+        while n_trucks > qtd_vehicles - 1:
             offspring.remove('#')
             n_trucks -= 1
         childs[i] = offspring

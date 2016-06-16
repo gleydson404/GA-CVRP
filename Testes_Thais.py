@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import os.path
 
 
-customers, qtd_customers, qtd_vehicles, capacity = load('tests/A-n32-k5_1.vrp')
+customers, qtd_customers, qtd_vehicles, capacity = load('tests/A-n65-k9.vrp')
 demands = customers[:, 3]
 cstrs_list = customers[:, 0]
 params_sets = load_parameters("config.json")
@@ -66,13 +66,14 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
                     filhos.extend(simple_one_point_cross
                                   (roleta(pop, fitness, max_fitness, min_fitness, total_fitness),
                                    roleta(pop, fitness, max_fitness, min_fitness, total_fitness),
-                                   pop, cstrs_list))
+                                   pop, cstrs_list, qtd_vehicles))
 
             if params['tipo_crossover'] == 2:
                 if params['tipo_selecao'] == 1:  # adiciona no final do vetor os filhos retornados pelo crossover 2
                     filhos.extend(simple_two_points_cross
                                   (pop, roleta(pop, fitness, max_fitness, min_fitness, total_fitness),
-                                   roleta(pop, fitness, max_fitness, min_fitness, total_fitness),cstrs_list))
+                                   roleta(pop, fitness, max_fitness, min_fitness, total_fitness), cstrs_list,
+                                   qtd_vehicles))
 
             if params['tipo_crossover'] == 3:
                 if params['tipo_selecao'] == 1:  # adiciona no final do vetor os filhos retornados pelo crossover 3
@@ -245,6 +246,6 @@ for params in params_sets:
         csvwriter.writerow(['Melhor Individuo', best_ind])
         resultado.close()
         
-        plot_graph(betters, means, stdr_dev, procriation, path) 
+        plot_graph(betters, means, stdr_dev, procriation, path)
         plot_route(best_ind, customers[:, 1:3], path)
         # print "Melhor fitness de ", params['execucao'], ": ", min(fitness_execucoes)
