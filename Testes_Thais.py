@@ -15,7 +15,6 @@ demands = customers[:, 3]
 cstrs_list = customers[:, 0]
 params_sets = load_parameters("config.json")
 dist_matrix = gen_dist_matrix(qtd_customers, customers)
-gama = 1
 
 # pop = gen_pop(params['tamanho_pop'], qtd_vehicles, qtd_customers, cstrs_list)
 
@@ -141,7 +140,7 @@ for params in params_sets:
 
     execucao = 0
     fitness_execucoes = []
-
+    gama = params['alfa']
     while execucao < params['execucao']:
         pop = gen_pop(params['tamanho_pop'], qtd_vehicles, qtd_customers, cstrs_list)
         params_list = []
