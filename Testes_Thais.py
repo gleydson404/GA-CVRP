@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import os.path
 
 
-customers, qtd_customers, qtd_vehicles, capacity = load('tests/A-n32-k5.vrp')
+customers, qtd_customers, qtd_vehicles, capacity = load('tests/A-n32-k5_1.vrp')
 demands = customers[:, 3]
 cstrs_list = customers[:, 0]
 params_sets = load_parameters("config.json")

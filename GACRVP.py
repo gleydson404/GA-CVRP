@@ -663,7 +663,7 @@ def main():
     # clientes com suas localidades vem do arquivo de teste
     # Lê arquivo de teste
     customers, qtd_customers, qtd_vehicles, capacity =\
-            load('tests/A-n32-k5.vrp')
+            load('tests/A-n32-k5_1.vrp')
     cstrs_list = customers[:, 0]
     params = load_parameters("config.json")
     gama = 1
