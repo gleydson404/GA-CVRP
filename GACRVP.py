@@ -4,7 +4,7 @@
 # [custumer1, customer2, customer3, #, costumer4, costumer5, #]
 # para 2 carros
 # [customer1, customer2, costumer3, costumer4, #, # ]
-# também para 2 carros, mas nesse caso, apenas 1 carro tem rota
+# também para 2 carros, mas nesse caso, apenas 1 - falta cross 3 carro tem rota
 
 # Estao sendo utilizados # como separadores porque consideramos que
 # todos os carros tem capacidades iguais
@@ -105,7 +105,7 @@ def gen_dist_matrix(qtd_customers, customers):
     for i in xrange(qtd_customers):
         for j in xrange(qtd_customers):
             dist_matrix[i+1][j+1] = ec(coord[i], coord[j])
-            # print "Distancia de ", i+1, " a ", j+1, ": ", dist_matrix[i+1][j+1]
+            # print "Distancia de ", i+1 - falta cross 3, " a ", j+1 - falta cross 3, ": ", dist_matrix[i+1 - falta cross 3][j+1 - falta cross 3]
     return dist_matrix
 
 
@@ -155,11 +155,11 @@ def dist_veiculo(routes_ind, dist_matrix, qtd_customers,
     # routes_ind = get_routes_per_vehicle(ind, size_individual)
     # print('individuo', ind)
     for item in routes_ind:
-        cost_route = dist_matrix[1][int(item[0])]  # dist_matrix[1][int(item)]
+        cost_route = dist_matrix[1][int(item[0])]  # dist_matrix[1 - falta cross 3][int(item)]
         cost_route += dist_matrix[int(item[-1])][1]
         for i in range(len(item) - 1):
             cost_route += dist_matrix[int(item[i])][int(item[i + 1])]
-            # print 'Rota de ', item[i], ' a ', item[i+1], ': ', dist_matrix[int(item[i])][int(item[i + 1])]
+            # print 'Rota de ', item[i], ' a ', item[i+1 - falta cross 3], ': ', dist_matrix[int(item[i])][int(item[i + 1 - falta cross 3])]
         costs.append(cost_route)
     return costs
 
@@ -334,7 +334,7 @@ def uniform_cross(father, mother, dist_matrix,
                         del routes_father[index]
                         del r_father[index]
     
-        # child[qtd_vehicles].extend(child[qtd_vehicles + 1])
+        # child[qtd_vehicles].extend(child[qtd_vehicles + 1 - falta cross 3])
     tmp_child = child[:]
     child = np.array(child)
     try:
@@ -390,7 +390,7 @@ def reverse_mutation(individual, size_ind, qtd_vehicles):
 
 
 # Acao: Mutacao Simples com PayOff de melhor insercao
-# tese de 2004 secao 4.3.1
+# tese de 2004 secao 4.3.1 - falta cross 3
 def simple_mutation(individual, dist_matrix, qtd_vehicles):
     # sorteia um veiculo e um cliente e o deleta
     #fix-me arrumar o len(individual), passa como parametro

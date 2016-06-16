@@ -1,1 +1,0 @@
-|[u'taxa_crossover', 0.7]|,|[u'taxa_elitismo', 0.1]|,|[u'execucao', 3]|,|[u'alfa', 1]|,|[u'taxa_mutacao', 0.7]|,|[u'tipo_mutacao', 1]|,|[u'c_variation', 1]|,|[u'tipo_selecao', 1]|,|[u'n_torneio', 5]|,|[u'troca_populacao', 1]|,|[u'mean_variation', 50]|,|[u'tipo_crossover', 4]|,|[u'geracoes', 5000]|,|[u'tamanho_pop', 200]|
