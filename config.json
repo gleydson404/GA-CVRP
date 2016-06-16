@@ -1,15 +1,33 @@
-{
+[
+    {
 	"tamanho_pop": 100,
-	"geracoes":5000,
+	"geracoes":10,
 	"taxa_crossover": 1,
 	"taxa_mutacao": 1,
 	"taxa_elitismo": 0.01,
 	"tipo_crossover": 4,
 	"tipo_mutacao": 3,
-	"tipo_selecao": 1,
+	"tipo_selecao": 2,
 	"n_torneio": 5,
 	"troca_populacao": 1,
 	"execucao": 1,
 	"c_variation": 4,
 	"mean_variation": 50
-}
+    },
+    {
+	"tamanho_pop": 100,
+	"geracoes":10,
+	"taxa_crossover": 1,
+	"taxa_mutacao": 1,
+	"taxa_elitismo": 0.3,
+	"tipo_crossover": 4,
+	"tipo_mutacao": 3,
+	"tipo_selecao": 2,
+	"n_torneio": 5,
+	"troca_populacao": 1,
+	"execucao": 1,
+	"c_variation": 4,
+	"mean_variation": 50
+    }
+
+]

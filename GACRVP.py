@@ -22,6 +22,7 @@ import json
 import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
 from cycler import cycler
+from operator import itemgetter
 
 # Lendo arquivo de configuracao .json
 def load_parameters(file):
@@ -601,6 +602,13 @@ def plot_route(ind, coords, path):
     plt.close()
 
 
+def tournament(fit_pop, k):
+    selecteds = []
+    for _ in range(k):
+        index = randint(0, len(fit_pop) - 1)
+        selecteds.append((fit_pop, index))
+
+    return min(selecteds, key=itemgetter(0))[1]
 
 
 def main():
