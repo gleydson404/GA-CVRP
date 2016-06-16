@@ -2,8 +2,6 @@ import numpy as np
 
 
 def load(file):
-    qtd = int(''.join(([x for x in file if x.isdigit()])[0: 2]))
-    clients = np.zeros((qtd, 4), np.uint8)
     clients_temp = []
     qtd_clients = 0
     qtd_trucks = 0
@@ -17,6 +15,7 @@ def load(file):
             qtd_trucks = int(''.join(([x for x in line if x.isdigit()])))
         if 'DIMENSION' in i:
             qtd_clients = int(''.join(([x for x in i if x.isdigit()])))
+            clients = np.zeros((qtd_clients, 4), np.uint8)
         if 'CAPACITY' in i:
             capacity = int(''.join(([x for x in i if x.isdigit()])))
         if 'DEPOT_SECTION' in i:
@@ -34,7 +33,7 @@ def load(file):
         if cord:
             line = i.split()
             clients_temp.append([int(line[0]), int(line[1]), int(line[2])])
-        if 'NODE_COORD_SECTION ' in i:
+        if 'NODE_COORD_SECTION' in i:
             cord = True
     f.close()
     return np.array(clients), int(qtd_clients), int(qtd_trucks), int(capacity)
