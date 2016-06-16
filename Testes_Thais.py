@@ -97,6 +97,12 @@ def pokemon(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size)
                                                 qtd_customers, qtd_vehicles, gama, demands,
                                                 capacity, size))
 
+            if params['tipo_crossover'] == 5:
+                if params['tipo_selecao'] == 1:  # adiciona no final do vetor os filhos retornados pelo crossover 4
+                    teste = ordered_cross(pop[(roleta(pop, fitness, max_fitness, min_fitness, total_fitness))],
+                                   pop[(roleta(pop, fitness, max_fitness, min_fitness, total_fitness))])
+                    filhos.append(teste[0])
+                    filhos.append(teste[1])
         else:
             if params['tipo_selecao'] == 1:
                 filhos.append(pop[roleta(pop, fitness, max_fitness, min_fitness, total_fitness)])

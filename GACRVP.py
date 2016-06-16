@@ -17,7 +17,7 @@
 import numpy as np
 from Distances import euclidian as ec
 from LoadTests import load
-from random import randint, choice, random
+from random import randint, choice, random, sample
 import json
 import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
@@ -118,12 +118,15 @@ def get_routes_per_vehicle(individual, size_individual):
     routes = []
     elesments = []
     for i in xrange(size_individual + 1):
-        if individual[i] != '#':
-            elesments.append(individual[i])
-        else:
-            if elesments:
-                routes.append(elesments[:])
-                elesments[:] = []
+        try:
+            if individual[i] != '#':
+                elesments.append(individual[i])
+            else:
+                if elesments:
+                    routes.append(elesments[:])
+                    elesments[:] = []
+        except ValueError:
+            print 'individuo errado', individual
     return routes
 
 
@@ -214,6 +217,51 @@ def simple_random_cross(pop, father, mother, dist_matrix, qtd_vehicles, custumer
         return np.array(child_1)
     else:
         return np.array(mother)
+
+
+def ordered_cross(father, mother):
+    trucks = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
+    father = np.array(father).tolist()
+    mother = np.array(mother).tolist()
+
+    def cross(ind1, ind2):
+        size = min(len(ind1), len(ind2))
+        n1, n2 = 0, 0
+        for i in range(size):
+            if ind1[i] == '#':
+                ind1[i] = trucks[n1]
+                n1 += 1
+            if ind2[i] == '#':
+                ind2[i] = trucks[n2]
+                n2 += 1
+        a, b = sample(xrange(size), 2)
+        if a > b:
+            a, b = b, a
+        holes1, holes2 = [True] * size, [True] * size
+        for i in range(size):
+            if i < a or i > b:
+                holes1[i] = False
+            else:
+                holes2[ind2.index(ind1[i])] = False
+        child = ['0'] * size
+        temp2 = []
+        for i in range(size):
+            if holes1[i]:
+                child[i] = ind1[i]
+            if holes2[i]:
+                temp2.append(ind2[i])
+        j = 0
+        for i in range(size):
+            if child[i] == '0':
+                child[i] = temp2[j]
+                j += 1
+        for i in range(size):
+            if child[i] in trucks:
+                child[i] = '#'
+        return child
+    child_1 = cross(father, mother)
+    child_2 = cross(mother, father)
+    return child_1, child_2
 
 
 def biggest_overlap_cross(father, mother):
