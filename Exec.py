@@ -9,11 +9,12 @@ import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
 import os.path
 
-
+# Carregando arquivo de teste e parametros
 customers, qtd_customers, qtd_vehicles, capacity = load('tests/B-n34-k5.vrp')
 demands = customers[:, 3]
 cstrs_list = customers[:, 0]
 params_sets = load_parameters("config.json")
+# Grarando matriz de distancias
 dist_matrix = gen_dist_matrix(qtd_customers, customers)
 
 # pop = gen_pop(params['tamanho_pop'], qtd_vehicles, qtd_customers, cstrs_list)
@@ -62,7 +63,7 @@ def evolve(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size):
         prob_crossover = np.random.uniform(0, 1)
         if prob_crossover <= params['taxa_crossover']:
             if params['tipo_crossover'] == 1:
-                if params['tipo_selecao'] == 1:  # adiciona no final do vetor os filhos retornados pelo crossover 1 - falta cross 3
+                if params['tipo_selecao'] == 1:  # adiciona no final do vetor os filhos retornados pelo crossover 1
                     filhos.extend(simple_one_point_cross
                                   (roleta(pop, fitness, max_fitness, min_fitness, total_fitness),
                                    roleta(pop, fitness, max_fitness, min_fitness, total_fitness),
@@ -99,7 +100,7 @@ def evolve(pop, dist_matrix, qtd_customers, qtd_vehicles, capacity, gama, size):
                                                 capacity, size))
 
             if params['tipo_crossover'] == 5:
-                if params['tipo_selecao'] == 1:  # adiciona no final do vetor os filhos retornados pelo crossover 4
+                if params['tipo_selecao'] == 1:  # adiciona no final do vetor os filhos retornados pelo crossover 5
                     teste = ordered_cross(pop[(roleta(pop, fitness, max_fitness, min_fitness, total_fitness))],
                                    pop[(roleta(pop, fitness, max_fitness, min_fitness, total_fitness))])
                     filhos.append(teste[0])
